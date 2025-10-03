@@ -5,6 +5,13 @@ document.addEventListener('DOMContentLoaded', function() {
   const refreshNotice = document.getElementById('refreshNotice');
   const balanceAmount = document.getElementById('balanceAmount');
   const balanceSource = document.getElementById('balanceSource');
+  const earningsBtn = document.getElementById('earningsBtn');
+
+  if (earningsBtn) {
+    earningsBtn.addEventListener('click', function() {
+      chrome.tabs.create({ url: 'https://www.fiverr.com/earnings?source=header_nav' });
+    });
+  }
 
   // Load saved state
 chrome.storage.local.get(['hideBalance'], function(result) {
