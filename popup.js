@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const balanceAmount = document.getElementById('balanceAmount');
   const balanceSource = document.getElementById('balanceSource');
   const earningsBtn = document.getElementById('earningsBtn');
+  const darkToggle = document.getElementById('darkToggle');
 
   if (earningsBtn) {
     earningsBtn.addEventListener('click', function() {
@@ -18,6 +19,12 @@ chrome.storage.local.get(['hideBalance'], function(result) {
     const isEnabled = result.hideBalance !== false; // Default to true
     toggle.checked = isEnabled;
     updateStatus(isEnabled);
+  });
+
+  // Load dark mode state
+chrome.storage.local.get(['darkMode'], function(result) {
+    const darkEnabled = !!result.darkMode;
+    if (darkToggle) darkToggle.checked = darkEnabled;
   });
   
   // Load balance information
@@ -48,6 +55,22 @@ chrome.storage.local.set({hideBalance: isEnabled}, function() {
       }
     });
   });
+
+  // Handle dark mode toggle
+  if (darkToggle) {
+    darkToggle.addEventListener('change', function() {
+      const enabled = darkToggle.checked;
+      chrome.storage.local.set({ darkMode: enabled });
+      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+        if (tabs[0] && tabs[0].url && tabs[0].url.includes('fiverr.com')) {
+          chrome.tabs.sendMessage(tabs[0].id, {
+            action: 'toggleDark',
+            enabled
+          }).catch(() => {});
+        }
+      });
+    });
+  }
 
   function updateStatus(isEnabled) {
     if (isEnabled) {
