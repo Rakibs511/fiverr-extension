@@ -40,6 +40,19 @@ function ensureDarkStylesheet() {
       --_1byh6kb3q: var(--fbh-border);
       --_1byh6kb1j: var(--fbh-surface);
       --_1byh6kb1l: var(--fbh-muted);
+
+      /* Map additional Fiverr design tokens seen in inline styles to dark palette */
+      /* Main surfaces and text */
+      --t2seezd: var(--fbh-surface);  /* frequently used as background */
+      --t2seez0: transparent;         /* often used for transparent bg */
+      --t2seez1y: var(--fbh-text);    /* primary text */
+      --t2seez1v: var(--fbh-muted);   /* secondary/muted text */
+      --t2seez1r: #0c0f14;            /* separators/lines */
+      --t2seez1x: #9aa6b2;            /* muted icon/text */
+      --t2seez1w: #7b8794;            /* even more muted */
+      --t2seez1o: #9aa6b2;            /* strokes/icons */
+      --t2seez1p: #cbd5e1;            /* hover/active text on dark */
+      --t2seez1t: #22c55e;            /* status online dot, etc. */
     }
 
     /* Base page colors */
@@ -389,6 +402,13 @@ function ensureDarkStylesheet() {
     html.fbh-dark svg [fill="#000000"] {
       fill: var(--fbh-text) !important;
     }
+    html.fbh-dark svg [stroke="#404145"],
+    html.fbh-dark svg [stroke="#62646A"],
+    html.fbh-dark svg [stroke="#222325"],
+    html.fbh-dark svg [stroke="#000"],
+    html.fbh-dark svg [stroke="#000000"] {
+      stroke: var(--fbh-text) !important;
+    }
 
     /* 9) Restore link colors after generic color override */
     html.fbh-dark a,
@@ -580,6 +600,21 @@ function ensureDarkStylesheet() {
     html.fbh-dark [class*="surface" i] {
       background-color: var(--fbh-surface) !important;
       color: var(--fbh-text) !important;
+    }
+
+    /* Fiverr inbox header and row wrappers (hashed classes) */
+    html.fbh-dark [class*="_1g8w6yds"],
+    html.fbh-dark .hvwcvi0,
+    html.fbh-dark .hvwcvi1,
+    html.fbh-dark .hvwcvi2 {
+      background-color: var(--fbh-surface) !important;
+    }
+
+    /* Skeleton/loading shimmer should not flash white */
+    html.fbh-dark ._12e1mi88,
+    html.fbh-dark .d5j9pe1 {
+      background-image: none !important;
+      background-color: var(--fbh-surface) !important;
     }
 
     /* Inputs */
