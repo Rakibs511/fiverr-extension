@@ -1,7 +1,21 @@
-// Popup script for Fiverr Privacy Extension
 document.addEventListener('DOMContentLoaded', function() {
+  // Tab switching
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const tabContents = document.querySelectorAll('.tab-content');
+  tabBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      const tab = btn.dataset.tab;
+      tabBtns.forEach(function(b) { b.classList.remove('active'); });
+      tabContents.forEach(function(c) { c.classList.remove('active'); });
+      btn.classList.add('active');
+      document.getElementById('tab-' + tab).classList.add('active');
+    });
+  });
+
   const toggle = document.getElementById('hideToggle');
+  const statusDot = document.getElementById('statusDot');
   const statusDiv = document.getElementById('statusDiv');
+  const statusBadge = document.getElementById('statusBadge');
   const refreshNotice = document.getElementById('refreshNotice');
   const balanceAmount = document.getElementById('balanceAmount');
   const balanceSource = document.getElementById('balanceSource');
@@ -14,49 +28,34 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Load saved state
-chrome.storage.local.get(['hideBalance'], function(result) {
-    const isEnabled = result.hideBalance !== false; // Default to true
+  chrome.storage.local.get(['hideBalance'], function(result) {
+    const isEnabled = result.hideBalance !== false;
     toggle.checked = isEnabled;
     updateStatus(isEnabled);
   });
 
-  // Load dark mode state
-chrome.storage.local.get(['darkMode'], function(result) {
+  chrome.storage.local.get(['darkMode'], function(result) {
     const darkEnabled = !!result.darkMode;
     if (darkToggle) darkToggle.checked = darkEnabled;
   });
-  
-  // Load balance information
+
   loadBalance();
 
-  // Handle toggle change
   toggle.addEventListener('change', function() {
     const isEnabled = toggle.checked;
-    
-    // Save state
-chrome.storage.local.set({hideBalance: isEnabled}, function() {
-      console.log('Balance hiding preference saved:', isEnabled);
-    });
-
-    // Update UI
+    chrome.storage.local.set({hideBalance: isEnabled});
     updateStatus(isEnabled);
     showRefreshNotice();
-
-    // Send message to content script
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
       if (tabs[0] && tabs[0].url && tabs[0].url.includes('fiverr.com')) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: 'toggleHide',
           enabled: isEnabled
-        }).catch(err => {
-          console.log('Could not send message to content script:', err);
-        });
+        }).catch(function() {});
       }
     });
   });
 
-  // Handle dark mode toggle
   if (darkToggle) {
     darkToggle.addEventListener('change', function() {
       const enabled = darkToggle.checked;
@@ -65,8 +64,8 @@ chrome.storage.local.set({hideBalance: isEnabled}, function() {
         if (tabs[0] && tabs[0].url && tabs[0].url.includes('fiverr.com')) {
           chrome.tabs.sendMessage(tabs[0].id, {
             action: 'toggleDark',
-            enabled
-          }).catch(() => {});
+            enabled: enabled
+          }).catch(function() {});
         }
       });
     });
@@ -76,6 +75,8 @@ chrome.storage.local.set({hideBalance: isEnabled}, function() {
   const autoRefreshToggle = document.getElementById('autoRefreshToggle');
   const autoRefreshStatus = document.getElementById('autoRefreshStatus');
   const countdownEl = document.getElementById('countdown');
+  const refreshNowBtn = document.getElementById('refreshNowBtn');
+  const autoRefreshOffBtn = document.getElementById('autoRefreshOffBtn');
 
   chrome.storage.local.get(['autoRefresh'], function(result) {
     if (autoRefreshToggle) {
@@ -86,22 +87,43 @@ chrome.storage.local.set({hideBalance: isEnabled}, function() {
   if (autoRefreshToggle) {
     autoRefreshToggle.addEventListener('change', function() {
       const enabled = autoRefreshToggle.checked;
-
-      chrome.runtime.sendMessage({ action: 'setAutoRefresh', enabled }).catch(() => {});
-
+      chrome.runtime.sendMessage({ action: 'setAutoRefresh', enabled }).catch(function() {});
       chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         if (tabs[0] && tabs[0].url && tabs[0].url.includes('fiverr.com')) {
           chrome.tabs.sendMessage(tabs[0].id, {
             action: 'toggleAutoRefresh',
             enabled: enabled
-          }).catch(() => {});
+          }).catch(function() {});
         }
       });
-
       if (enabled) {
         autoRefreshStatus.style.display = 'block';
         pollCountdown();
       } else {
+        autoRefreshStatus.style.display = 'none';
+      }
+    });
+  }
+
+  if (refreshNowBtn) {
+    refreshNowBtn.addEventListener('click', function() {
+      chrome.runtime.sendMessage({ action: 'forceRefresh' }).catch(function() {});
+    });
+  }
+
+  if (autoRefreshOffBtn) {
+    autoRefreshOffBtn.addEventListener('click', function() {
+      if (autoRefreshToggle) {
+        autoRefreshToggle.checked = false;
+        chrome.runtime.sendMessage({ action: 'setAutoRefresh', enabled: false }).catch(function() {});
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+          if (tabs[0] && tabs[0].url && tabs[0].url.includes('fiverr.com')) {
+            chrome.tabs.sendMessage(tabs[0].id, {
+              action: 'toggleAutoRefresh',
+              enabled: false
+            }).catch(function() {});
+          }
+        });
         autoRefreshStatus.style.display = 'none';
       }
     });
@@ -132,35 +154,35 @@ chrome.storage.local.set({hideBalance: isEnabled}, function() {
 
   function updateStatus(isEnabled) {
     if (isEnabled) {
-      statusDiv.textContent = '🔒 Balance Hiding: ON';
-      statusDiv.className = 'status enabled';
+      statusDiv.textContent = 'Balance Hiding: ON';
+      statusDot.className = 'status-dot on';
+      statusBadge.textContent = 'Active';
+      statusBadge.className = 'status-badge on';
     } else {
-      statusDiv.textContent = '👁️ Balance Hiding: OFF';
-      statusDiv.className = 'status disabled';
+      statusDiv.textContent = 'Balance Hiding: OFF';
+      statusDot.className = 'status-dot off';
+      statusBadge.textContent = 'Inactive';
+      statusBadge.className = 'status-badge off';
     }
   }
 
   function showRefreshNotice() {
     refreshNotice.style.display = 'block';
-    setTimeout(() => {
+    setTimeout(function() {
       refreshNotice.style.display = 'none';
     }, 3000);
   }
-  
+
   function loadBalance() {
-    // First try to get balance from active Fiverr tab
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
       if (tabs[0] && tabs[0].url && tabs[0].url.includes('fiverr.com')) {
-        // Try to get live balance from content script
         chrome.tabs.sendMessage(tabs[0].id, {
           action: 'getBalance'
         }, function(response) {
           if (chrome.runtime.lastError) {
-            console.log('Could not get balance from content script, trying cache...');
             loadBalanceFromCache();
             return;
           }
-          
           if (response && response.success && response.balanceText) {
             displayBalance(response.balanceText, response.source === 'dom' ? 'Live from Fiverr' : 'Cached');
           } else {
@@ -168,24 +190,23 @@ chrome.storage.local.set({hideBalance: isEnabled}, function() {
           }
         });
       } else {
-        // Not on Fiverr, load from cache
         loadBalanceFromCache();
       }
     });
   }
-  
+
   function loadBalanceFromCache() {
-chrome.storage.local.get(['lastBalance', 'lastBalanceAt'], function(result) {
+    chrome.storage.local.get(['lastBalance', 'lastBalanceAt'], function(result) {
       if (result.lastBalance) {
         const date = result.lastBalanceAt ? new Date(result.lastBalanceAt) : null;
         const timeStr = date ? date.toLocaleString() : 'Unknown time';
-        displayBalance(result.lastBalance, `Cached (${timeStr})`);
+        displayBalance(result.lastBalance, 'Cached (' + timeStr + ')');
       } else {
-        displayBalance('No balance data available', 'Visit Fiverr.com to load');
+        displayBalance('No balance data', 'Visit Fiverr.com to load');
       }
     });
   }
-  
+
   function displayBalance(amount, source) {
     balanceAmount.textContent = amount;
     balanceSource.textContent = source;

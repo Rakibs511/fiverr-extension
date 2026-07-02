@@ -3,231 +3,327 @@
 <head>
   <meta charset="utf-8">
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       width: 290px;
-      padding: 20px;
-      font-family: Arial, sans-serif;
-      margin: 0;
+      background: #0f1115;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 13px;
+      overflow: hidden;
     }
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
     .header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .header h2 {
-      margin: 0;
-      color: #333;
-    }
-    
-    .toggle-container {
+      background: linear-gradient(145deg, #161922, #0f1115);
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 15px;
-      background-color: #f8f9fa;
+    }
+    .header h1 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.2px;
+    }
+    .header .subtitle {
+      font-size: 10px;
+      color: rgba(255,255,255,0.35);
+      margin-top: 1px;
+      letter-spacing: 0.2px;
+    }
+    .header-logo {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, #1DBF73, #17a865);
       border-radius: 8px;
-      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: #fff;
+      font-weight: 700;
     }
-    
-    .toggle-label {
-      font-weight: bold;
-      color: #333;
+
+    .tab-nav {
+      display: flex;
+      background: #161922;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
     }
-    
-    /* Toggle Switch Styles */
+    .tab-btn {
+      flex: 1;
+      padding: 10px 8px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.35);
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      transition: all 0.2s;
+      border-bottom: 2px solid transparent;
+      letter-spacing: 0.2px;
+    }
+    .tab-btn:hover { color: rgba(255,255,255,0.6); }
+    .tab-btn.active {
+      color: #1DBF73;
+      border-bottom-color: #1DBF73;
+    }
+
+    .tab-content { display: none; padding: 14px 16px; max-height: 340px; overflow-y: auto; }
+    .tab-content.active { display: block; }
+
+    .card {
+      background: #161922;
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .toggle-label { font-size: 13px; font-weight: 600; }
+    .toggle-desc { font-size: 10.5px; color: rgba(255,255,255,0.35); margin-top: 2px; line-height: 1.3; }
+
     .switch {
       position: relative;
       display: inline-block;
-      width: 60px;
-      height: 34px;
+      width: 42px;
+      height: 24px;
+      flex-shrink: 0;
     }
-    
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-    
+    .switch input { opacity: 0; width: 0; height: 0; }
     .slider {
       position: absolute;
       cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #ccc;
-      -webkit-transition: .4s;
-      transition: .4s;
-      border-radius: 34px;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255,255,255,0.1);
+      transition: .3s;
+      border-radius: 24px;
     }
-    
     .slider:before {
       position: absolute;
       content: "";
-      height: 26px;
-      width: 26px;
-      left: 4px;
-      bottom: 4px;
-      background-color: white;
-      -webkit-transition: .4s;
-      transition: .4s;
+      height: 18px; width: 18px;
+      left: 3px; bottom: 3px;
+      background: #fff;
+      transition: .3s;
       border-radius: 50%;
     }
-    
-    input:checked + .slider {
-      background-color: #4CAF50;
-    }
-    
-    input:focus + .slider {
-      box-shadow: 0 0 1px #4CAF50;
-    }
-    
-    input:checked + .slider:before {
-      -webkit-transform: translateX(26px);
-      -ms-transform: translateX(26px);
-      transform: translateX(26px);
-    }
-    
-    .status {
-      padding: 10px;
-      border-radius: 5px;
+    input:checked + .slider { background: #1DBF73; }
+    input:checked + .slider:before { transform: translateX(18px); }
+
+    .balance-card {
       text-align: center;
-      margin-bottom: 15px;
-      font-weight: bold;
+      padding: 18px 16px 14px;
     }
-    
-    .status.enabled {
-      background-color: #4CAF50;
-      color: white;
+    .balance-label {
+      font-size: 10.5px;
+      color: rgba(255,255,255,0.35);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
     }
-    
-    .status.disabled {
-      background-color: #f44336;
-      color: white;
-    }
-    
-    .description {
-      color: #666;
-      font-size: 14px;
-      line-height: 1.4;
-    }
-    
-    .feature {
-      margin: 10px 0;
-      padding: 8px;
-      background-color: #f5f5f5;
-      border-radius: 4px;
-    }
-    
-    .refresh-notice {
-      font-size: 12px;
-      color: #ff9800;
-      text-align: center;
-      margin-top: 10px;
-      padding: 8px;
-      background-color: #fff3cd;
-      border-radius: 4px;
-      display: none;
-    }
-    
-    .balance-info {
-      color: #666;
-      font-size: 14px;
-      line-height: 1.4;
-    }
-    
-    .current-balance {
-      margin: 10px 0;
-      padding: 12px;
-      background-color: #e8f5e8;
-      border-radius: 8px;
-      border-left: 4px solid #4CAF50;
-    }
-    
     .balance-amount {
-      font-size: 18px;
-      font-weight: bold;
-      color: #2e7d32;
+      font-size: 26px;
+      font-weight: 800;
+      color: #1DBF73;
       display: block;
-      margin: 8px 0;
+      line-height: 1.2;
     }
-    
     .balance-source {
-      font-size: 11px;
-      color: #888;
-      font-style: italic;
+      font-size: 10px;
+      color: rgba(255,255,255,0.25);
+      display: block;
+      margin-top: 4px;
     }
 
-    .earnings-btn {
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .status-dot.on { background: #1DBF73; box-shadow: 0 0 6px rgba(29,191,115,0.4); }
+    .status-dot.off { background: #f44336; box-shadow: 0 0 6px rgba(244,67,54,0.3); }
+    .status-text { font-size: 12px; font-weight: 600; flex: 1; }
+    .status-badge {
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .status-badge.on { background: rgba(29,191,115,0.12); color: #1DBF73; }
+    .status-badge.off { background: rgba(244,67,54,0.12); color: #f44336; }
+
+    .btn {
       display: block;
       width: 100%;
-      padding: 10px 12px;
-      background-color: #4CAF50;
-      color: #fff;
+      padding: 9px 12px;
       border: none;
-      border-radius: 6px;
-      cursor: pointer;
+      border-radius: 8px;
+      font-size: 12px;
       font-weight: 600;
-      margin: 0 0 12px 0;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .btn-primary { background: #1DBF73; color: #fff; }
+    .btn-primary:hover { background: #17a865; }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.6);
+    }
+    .btn-outline:hover { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.8); }
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 11px;
+      width: auto;
+      display: inline-block;
+    }
+    .btn-green { background: rgba(29,191,115,0.15); color: #1DBF73; border: 1px solid rgba(29,191,115,0.2); }
+    .btn-green:hover { background: rgba(29,191,115,0.25); }
+    .btn-red { background: rgba(244,67,54,0.12); color: #f44336; border: 1px solid rgba(244,67,54,0.15); }
+    .btn-red:hover { background: rgba(244,67,54,0.2); }
+
+    .refresh-notice {
+      font-size: 10.5px;
+      color: #ff9800;
+      text-align: center;
+      padding: 6px 10px;
+      background: rgba(255,152,0,0.1);
+      border-radius: 6px;
+      display: none;
+      margin-top: 6px;
     }
 
-    .earnings-btn:hover {
-      background-color: #43a047;
+    .countdown-box {
+      text-align: center;
+      padding: 12px;
+      margin-top: 8px;
+      background: rgba(0,0,0,0.15);
+      border-radius: 8px;
     }
+    .countdown-number {
+      font-size: 28px;
+      font-weight: 800;
+      color: #1DBF73;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 1px;
+    }
+    .countdown-label {
+      font-size: 10px;
+      color: rgba(255,255,255,0.3);
+      margin-top: 2px;
+    }
+    .countdown-actions {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .mt-2 { margin-top: 10px; }
+    .flex { display: flex; align-items: center; gap: 8px; }
+    .gap-2 { gap: 10px; }
   </style>
 </head>
 <body>
   <div class="header">
-    <h2>Fiverr Privacy Extension</h2>
+    <div>
+      <h1>Fiverr Assistant Pro</h1>
+      <div class="subtitle">Privacy &amp; Productivity</div>
+    </div>
+    <div class="header-logo">F</div>
   </div>
 
-  <button id="earningsBtn" class="earnings-btn" type="button">Earning</button>
-  
-  <div class="toggle-container">
-    <span class="toggle-label">Hide Balance</span>
-    <label class="switch">
-      <input type="checkbox" id="hideToggle">
-      <span class="slider"></span>
-    </label>
+  <div class="tab-nav">
+    <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+    <button class="tab-btn" data-tab="settings">Settings</button>
   </div>
-  
-  <div class="toggle-container">
-    <span class="toggle-label">Dark Mode</span>
-    <label class="switch">
-      <input type="checkbox" id="darkToggle">
-      <span class="slider"></span>
-    </label>
-  </div>
-  
-  <div class="toggle-container">
-    <span class="toggle-label">Auto Refresh (Advance)</span>
-    <label class="switch">
-      <input type="checkbox" id="autoRefreshToggle">
-      <span class="slider"></span>
-    </label>
-  </div>
-  
-  <div id="autoRefreshStatus" style="display:none; text-align:center; font-size:12px; color:#666; margin-bottom:10px; padding:6px; background:#f0f8f0; border-radius:4px;">
-    Next refresh in <span id="countdown">--:--</span>
-  </div>
-  
-  <div class="status enabled" id="statusDiv">
-    🔒 Balance Hiding: ON
-  </div>
-  
-  <div class="refresh-notice" id="refreshNotice">
-    ⚠️ Refresh the Fiverr page to apply changes
-  </div>
-  
-  <div class="balance-info">
-    <div class="current-balance">
-      <strong>💰 Your Current Balance:</strong><br>
+
+  <div class="tab-content active" id="tab-dashboard">
+    <div class="card balance-card">
+      <div class="balance-label">Current Balance</div>
       <span class="balance-amount" id="balanceAmount">Loading...</span>
       <span class="balance-source" id="balanceSource"></span>
     </div>
-    
-    <p style="font-size: 12px; color: #999; margin-top: 15px;">
-      Your balance is safely displayed here while hidden from public view.
-    </p>
+
+    <div class="card">
+      <div class="status-row">
+        <span class="status-dot on" id="statusDot"></span>
+        <span class="status-text" id="statusDiv">Balance Hiding: ON</span>
+        <span class="status-badge on" id="statusBadge">Active</span>
+      </div>
+    </div>
+
+    <button id="earningsBtn" class="btn btn-primary" type="button">Open Earnings</button>
+  </div>
+
+  <div class="tab-content" id="tab-settings">
+    <div class="card">
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Hide Balance</div>
+          <div class="toggle-desc">Hide your balance from Fiverr pages</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="hideToggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="refresh-notice" id="refreshNotice">Refresh the Fiverr page to apply changes</div>
+    </div>
+
+    <div class="card">
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Dark Mode</div>
+          <div class="toggle-desc">Dark theme for Fiverr interface</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="darkToggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Auto Refresh</div>
+          <div class="toggle-desc">Auto-refresh every 3-5 min when idle</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="autoRefreshToggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="countdown-box" id="autoRefreshStatus" style="display:none;">
+        <div class="countdown-number" id="countdown">--:--</div>
+        <div class="countdown-label">Next refresh</div>
+        <div class="countdown-actions">
+          <button class="btn btn-sm btn-green" id="refreshNowBtn">&#x21BB; Refresh Now</button>
+          <button class="btn btn-sm btn-red" id="autoRefreshOffBtn">&#x2715; OFF</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="popup.js"></script>

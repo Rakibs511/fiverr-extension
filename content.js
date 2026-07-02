@@ -3,6 +3,13 @@
 
 // Global state
 let isHideEnabled = true;
+
+function safeChrome(fn) {
+  try {
+    const r = fn();
+    if (r && typeof r.catch === 'function') r.catch(() => {});
+  } catch (e) {}
+}
 let initialized = false;
 
 // Dark mode constants
@@ -863,7 +870,7 @@ function extractBalanceText() {
 function updateBalanceCache() {
   const text = extractBalanceText();
   if (text) {
-chrome.storage.local.set({ lastBalance: text, lastBalanceAt: Date.now() });
+    safeChrome(() => chrome.storage.local.set({ lastBalance: text, lastBalanceAt: Date.now() }, () => {}));
   }
 }
 
@@ -874,64 +881,65 @@ function process() {
 }
 
 // Listen for messages from popup
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-  if (request.action === 'toggleHide') {
-    isHideEnabled = request.enabled;
+safeChrome(() => {
+  chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    if (request.action === 'toggleHide') {
+      isHideEnabled = request.enabled;
 
-    process();
-    sendResponse({ success: true });
-    return; // no async
-  }
-  if (request.action === 'toggleDark') {
-    applyDarkMode(request.enabled);
-    sendResponse({ success: true });
-    return; // no async
-  }
-  if (request.action === 'getBalance') {
-    const text = extractBalanceText();
-    if (text) {
-      sendResponse({ success: true, balanceText: text, source: 'dom' });
-      // Also cache it
-chrome.storage.local.set({ lastBalance: text, lastBalanceAt: Date.now() });
-      return; // no async
+      process();
+      sendResponse({ success: true });
+      return;
     }
-    // Fallback to storage (async)
-chrome.storage.local.get(['lastBalance', 'lastBalanceAt'], (res) => {
-      sendResponse({
-        success: !!res.lastBalance,
-        balanceText: res.lastBalance || null,
-        source: 'cache',
-        at: res.lastBalanceAt || null
+    if (request.action === 'toggleDark') {
+      applyDarkMode(request.enabled);
+      sendResponse({ success: true });
+      return;
+    }
+    if (request.action === 'getBalance') {
+      const text = extractBalanceText();
+      if (text) {
+        sendResponse({ success: true, balanceText: text, source: 'dom' });
+        safeChrome(() => chrome.storage.local.set({ lastBalance: text, lastBalanceAt: Date.now() }, () => {}));
+        return;
+      }
+      safeChrome(() => {
+        chrome.storage.local.get(['lastBalance', 'lastBalanceAt'], (res) => {
+          sendResponse({
+            success: !!res.lastBalance,
+            balanceText: res.lastBalance || null,
+            source: 'cache',
+            at: res.lastBalanceAt || null
+          });
+        });
       });
-    });
-    return true; // keep the channel open for async response
-  }
-  if (request.action === 'toggleAutoRefresh') {
-    if (request.enabled) {
-      enableAutoRefreshUI();
-    } else {
-      disableAutoRefreshUI();
+      return true;
     }
-    sendResponse({ success: true });
-    return;
-  }
+    if (request.action === 'toggleAutoRefresh') {
+      if (request.enabled) {
+        enableAutoRefreshUI();
+      } else {
+        disableAutoRefreshUI();
+      }
+      sendResponse({ success: true });
+      return;
+    }
+  });
 });
 
 // Load user preference first, then inject CSS if needed
-chrome.storage.local.get(['hideBalance', 'darkMode'], function(result) {
-  isHideEnabled = result.hideBalance !== false; // Default to true
-  const darkEnabled = !!result.darkMode;
+safeChrome(() => {
+  chrome.storage.local.get(['hideBalance', 'darkMode'], function(result) {
+    isHideEnabled = result.hideBalance !== false;
+    const darkEnabled = !!result.darkMode;
 
+    applyDarkMode(darkEnabled);
 
-  // Apply dark mode preference
-  applyDarkMode(darkEnabled);
-  
-  // Only inject immediate CSS if hiding is enabled
-  if (isHideEnabled) {
-    injectImmediateCSS();
-  }
-  
-  process();
+    if (isHideEnabled) {
+      injectImmediateCSS();
+    }
+
+    process();
+  });
 });
 
 // Initialize the extension
@@ -1134,13 +1142,15 @@ function createCounterElement() {
     </div>
   `;
 
-  chrome.storage.local.get('autoRefreshPos', (result) => {
-    if (result.autoRefreshPos) {
-      autoRefreshCounter.style.left = result.autoRefreshPos.left;
-      autoRefreshCounter.style.top = result.autoRefreshPos.top;
-      autoRefreshCounter.style.bottom = 'auto';
-      autoRefreshCounter.style.right = 'auto';
-    }
+  safeChrome(() => {
+    chrome.storage.local.get('autoRefreshPos', (result) => {
+      if (result.autoRefreshPos) {
+        autoRefreshCounter.style.left = result.autoRefreshPos.left;
+        autoRefreshCounter.style.top = result.autoRefreshPos.top;
+        autoRefreshCounter.style.bottom = 'auto';
+        autoRefreshCounter.style.right = 'auto';
+      }
+    });
   });
 
   const refreshBtn = autoRefreshCounter.querySelector('._btn-refresh');
@@ -1148,12 +1158,12 @@ function createCounterElement() {
 
   refreshBtn.addEventListener('mousedown', (e) => e.stopPropagation());
   refreshBtn.addEventListener('click', () => {
-    chrome.runtime.sendMessage({ action: 'forceRefresh' });
+    chrome.runtime.sendMessage({ action: 'forceRefresh' }).catch(() => {});
   });
 
   offBtn.addEventListener('mousedown', (e) => e.stopPropagation());
   offBtn.addEventListener('click', () => {
-    chrome.runtime.sendMessage({ action: 'setAutoRefresh', enabled: false });
+    chrome.runtime.sendMessage({ action: 'setAutoRefresh', enabled: false }).catch(() => {});
     disableAutoRefreshUI();
   });
 
@@ -1188,12 +1198,12 @@ function createCounterElement() {
     isDragging = false;
     autoRefreshCounter.style.cursor = 'grab';
     autoRefreshCounter.style.transition = '';
-    chrome.storage.local.set({
+    safeChrome(() => chrome.storage.local.set({
       autoRefreshPos: {
         left: autoRefreshCounter.style.left,
         top: autoRefreshCounter.style.top
       }
-    });
+    }, () => {}));
   });
 
   const appendToBody = () => {
@@ -1209,38 +1219,40 @@ function createCounterElement() {
 function updateCounterDisplay() {
   if (!autoRefreshCounter) return;
 
-  chrome.storage.local.get(['nextRefreshAt', 'autoRefresh'], (result) => {
-    if (!result.autoRefresh) {
-      autoRefreshCounter.style.display = 'none';
-      chrome.runtime.sendMessage({ action: 'updateBadge', text: '' }).catch(() => {});
-      return;
-    }
+  safeChrome(() => {
+    chrome.storage.local.get(['nextRefreshAt', 'autoRefresh'], (result) => {
+      if (!result.autoRefresh) {
+        autoRefreshCounter.style.display = 'none';
+        chrome.runtime.sendMessage({ action: 'updateBadge', text: '' }).catch(() => {});
+        return;
+      }
 
-    autoRefreshCounter.style.display = 'flex';
-    const timeEl = autoRefreshCounter.querySelector('._counter-time');
+      autoRefreshCounter.style.display = 'flex';
+      const timeEl = autoRefreshCounter.querySelector('._counter-time');
 
-    autoRefreshCounter.classList.remove('_counter-warning', '_counter-critical');
+      autoRefreshCounter.classList.remove('_counter-warning', '_counter-critical');
 
-    if (!result.nextRefreshAt) {
-      timeEl.textContent = '--:--';
-      chrome.runtime.sendMessage({ action: 'updateBadge', text: '' }).catch(() => {});
-      return;
-    }
+      if (!result.nextRefreshAt) {
+        timeEl.textContent = '--:--';
+        chrome.runtime.sendMessage({ action: 'updateBadge', text: '' }).catch(() => {});
+        return;
+      }
 
-    const remaining = Math.max(0, result.nextRefreshAt - Date.now());
-    const totalSecs = Math.ceil(remaining / 1000);
-    const mins = Math.floor(totalSecs / 60);
-    const secs = totalSecs % 60;
-    timeEl.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+      const remaining = Math.max(0, result.nextRefreshAt - Date.now());
+      const totalSecs = Math.ceil(remaining / 1000);
+      const mins = Math.floor(totalSecs / 60);
+      const secs = totalSecs % 60;
+      timeEl.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
 
-    if (totalSecs <= 15) {
-      autoRefreshCounter.classList.add('_counter-critical');
-    } else if (totalSecs <= 45) {
-      autoRefreshCounter.classList.add('_counter-warning');
-    }
+      if (totalSecs <= 15) {
+        autoRefreshCounter.classList.add('_counter-critical');
+      } else if (totalSecs <= 45) {
+        autoRefreshCounter.classList.add('_counter-warning');
+      }
 
-    const badgeText = `${mins}:${secs.toString().padStart(2, '0')}`;
-    chrome.runtime.sendMessage({ action: 'updateBadge', text: badgeText }).catch(() => {});
+      const badgeText = `${mins}:${secs.toString().padStart(2, '0')}`;
+      chrome.runtime.sendMessage({ action: 'updateBadge', text: badgeText }).catch(() => {});
+    });
   });
 }
 
@@ -1254,7 +1266,7 @@ function setupActivityDetection() {
     const now = Date.now();
     if (now - lastSave > 1000) {
       lastSave = now;
-      chrome.storage.local.set({ userLastActiveAt: now });
+      safeChrome(() => chrome.storage.local.set({ userLastActiveAt: now }, () => {}));
     }
   };
 
@@ -1263,7 +1275,7 @@ function setupActivityDetection() {
   document.addEventListener('touchstart', saveActivity, true);
   document.addEventListener('scroll', saveActivity, true);
 
-  chrome.storage.local.set({ userLastActiveAt: Date.now() });
+  safeChrome(() => chrome.storage.local.set({ userLastActiveAt: Date.now() }, () => {}));
 }
 
 function enableAutoRefreshUI() {
@@ -1285,24 +1297,28 @@ function disableAutoRefreshUI() {
   }
 }
 
-chrome.storage.local.get('autoRefresh', (result) => {
-  if (result.autoRefresh) {
-    enableAutoRefreshUI();
-  }
+safeChrome(() => {
+  chrome.storage.local.get('autoRefresh', (result) => {
+    if (result.autoRefresh) {
+      enableAutoRefreshUI();
+    }
+  });
 });
 
-chrome.storage.onChanged.addListener((changes, area) => {
-  if (area !== 'local') return;
+safeChrome(() => {
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== 'local') return;
 
-  if (changes.autoRefresh) {
-    if (changes.autoRefresh.newValue) {
-      enableAutoRefreshUI();
-    } else {
-      disableAutoRefreshUI();
+    if (changes.autoRefresh) {
+      if (changes.autoRefresh.newValue) {
+        enableAutoRefreshUI();
+      } else {
+        disableAutoRefreshUI();
+      }
     }
-  }
 
-  if (changes.nextRefreshAt && autoRefreshCounter) {
-    updateCounterDisplay();
-  }
+    if (changes.nextRefreshAt && autoRefreshCounter) {
+      updateCounterDisplay();
+    }
+  });
 });
