@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <style>
     body {
-      width: 320px;
+      width: 290px;
       padding: 20px;
       font-family: Arial, sans-serif;
       margin: 0;
@@ -196,6 +196,18 @@
       <input type="checkbox" id="darkToggle">
       <span class="slider"></span>
     </label>
+  </div>
+  
+  <div class="toggle-container">
+    <span class="toggle-label">Auto Refresh (Advance)</span>
+    <label class="switch">
+      <input type="checkbox" id="autoRefreshToggle">
+      <span class="slider"></span>
+    </label>
+  </div>
+  
+  <div id="autoRefreshStatus" style="display:none; text-align:center; font-size:12px; color:#666; margin-bottom:10px; padding:6px; background:#f0f8f0; border-radius:4px;">
+    Next refresh in <span id="countdown">--:--</span>
   </div>
   
   <div class="status enabled" id="statusDiv">

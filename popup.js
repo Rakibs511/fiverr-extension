@@ -72,6 +72,64 @@ chrome.storage.local.set({hideBalance: isEnabled}, function() {
     });
   }
 
+  // Auto-refresh
+  const autoRefreshToggle = document.getElementById('autoRefreshToggle');
+  const autoRefreshStatus = document.getElementById('autoRefreshStatus');
+  const countdownEl = document.getElementById('countdown');
+
+  chrome.storage.local.get(['autoRefresh'], function(result) {
+    if (autoRefreshToggle) {
+      autoRefreshToggle.checked = !!result.autoRefresh;
+    }
+  });
+
+  if (autoRefreshToggle) {
+    autoRefreshToggle.addEventListener('change', function() {
+      const enabled = autoRefreshToggle.checked;
+
+      chrome.runtime.sendMessage({ action: 'setAutoRefresh', enabled }).catch(() => {});
+
+      chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        if (tabs[0] && tabs[0].url && tabs[0].url.includes('fiverr.com')) {
+          chrome.tabs.sendMessage(tabs[0].id, {
+            action: 'toggleAutoRefresh',
+            enabled: enabled
+          }).catch(() => {});
+        }
+      });
+
+      if (enabled) {
+        autoRefreshStatus.style.display = 'block';
+        pollCountdown();
+      } else {
+        autoRefreshStatus.style.display = 'none';
+      }
+    });
+  }
+
+  function pollCountdown() {
+    chrome.runtime.sendMessage({ action: 'getAutoRefreshStatus' }, function(response) {
+      if (response && response.enabled) {
+        if (response.nextRefreshAt) {
+          const remaining = Math.max(0, response.nextRefreshAt - Date.now());
+          const mins = Math.floor(remaining / 60000);
+          const secs = Math.floor((remaining % 60000) / 1000);
+          countdownEl.textContent = mins + ':' + secs.toString().padStart(2, '0');
+        } else {
+          countdownEl.textContent = '--:--';
+        }
+        autoRefreshStatus.style.display = 'block';
+        setTimeout(pollCountdown, 1000);
+      } else {
+        autoRefreshStatus.style.display = 'none';
+      }
+    });
+  }
+
+  if (autoRefreshToggle && autoRefreshToggle.checked) {
+    pollCountdown();
+  }
+
   function updateStatus(isEnabled) {
     if (isEnabled) {
       statusDiv.textContent = '🔒 Balance Hiding: ON';

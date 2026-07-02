@@ -1,13 +1,13 @@
 // Fiverr Balance Hider with Toggle Support - Fixed Version
-console.log('Fiverr Privacy Extension: Loading at document_start...');
+
 
 // Global state
 let isHideEnabled = true;
 let initialized = false;
 
 // Dark mode constants
-const DARK_CLASS = 'fbh-dark';
-const DARK_STYLE_ID = 'fbh-dark-style';
+const DARK_CLASS = '_dark';
+const DARK_STYLE_ID = '_dark-style';
 
 function ensureDarkStylesheet() {
   if (document.getElementById(DARK_STYLE_ID)) return;
@@ -15,38 +15,38 @@ function ensureDarkStylesheet() {
   style.id = DARK_STYLE_ID;
   style.textContent = `
     /* Proper dark theme: map light backgrounds to dark and darken text */
-    html.fbh-dark {
+    html._dark {
       color-scheme: dark;
-      --fbh-bg: #0f1115;
-      --fbh-surface: #12151c;
-      --fbh-text: #f1f5f9; /* off-white */
-      --fbh-muted: #9aa4b2;
-      --fbh-border: #2a2f3a;
-      --fbh-input: #0e141b;
-      --fbh-link: #1DBF73; /* Fiverr primary green */
-      --fbh-link-hover: #17a865;
-      --fbh-hover: #1a2230;            /* solid hover bg */
-      --fbh-hover-soft: rgba(255,255,255,0.06); /* subtle hover tint */
+      --_bg: #0f1115;
+      --_surface: #12151c;
+      --_text: #f1f5f9; /* off-white */
+      --_muted: #9aa4b2;
+      --_border: #2a2f3a;
+      --_input: #0e141b;
+      --_link: #1DBF73; /* Fiverr primary green */
+      --_link-hover: #17a865;
+      --_hover: #1a2230;            /* solid hover bg */
+      --_hover-soft: rgba(255,255,255,0.06); /* subtle hover tint */
 
       /* Map some common Fiverr token-like vars (from your DOM snippet) to dark */
-      --_1byh6kb1o: var(--fbh-text);       /* text */
-      --_1byh6kb1h: var(--fbh-surface);    /* surfaces */
-      --_1byh6kb0: var(--fbh-border);      /* subtle borders */
-      --_1byh6kb1e: var(--fbh-border);
-      --_1byh6kb1f: var(--fbh-border);
-      --_1byh6kb9v: var(--fbh-link);       /* primary */
-      --_1byh6kba6: var(--fbh-link-hover); /* primary hover */
-      --_1byh6kb3z: var(--fbh-surface);
-      --_1byh6kb3q: var(--fbh-border);
-      --_1byh6kb1j: var(--fbh-surface);
-      --_1byh6kb1l: var(--fbh-muted);
+      --_1byh6kb1o: var(--_text);       /* text */
+      --_1byh6kb1h: var(--_surface);    /* surfaces */
+      --_1byh6kb0: var(--_border);      /* subtle borders */
+      --_1byh6kb1e: var(--_border);
+      --_1byh6kb1f: var(--_border);
+      --_1byh6kb9v: var(--_link);       /* primary */
+      --_1byh6kba6: var(--_link-hover); /* primary hover */
+      --_1byh6kb3z: var(--_surface);
+      --_1byh6kb3q: var(--_border);
+      --_1byh6kb1j: var(--_surface);
+      --_1byh6kb1l: var(--_muted);
 
       /* Map additional Fiverr design tokens seen in inline styles to dark palette */
       /* Main surfaces and text */
-      --t2seezd: var(--fbh-surface);  /* frequently used as background */
+      --t2seezd: var(--_surface);  /* frequently used as background */
       --t2seez0: transparent;         /* often used for transparent bg */
-      --t2seez1y: var(--fbh-text);    /* primary text */
-      --t2seez1v: var(--fbh-muted);   /* secondary/muted text */
+      --t2seez1y: var(--_text);    /* primary text */
+      --t2seez1v: var(--_muted);   /* secondary/muted text */
       --t2seez1r: #0c0f14;            /* separators/lines */
       --t2seez1x: #9aa6b2;            /* muted icon/text */
       --t2seez1w: #7b8794;            /* even more muted */
@@ -56,240 +56,240 @@ function ensureDarkStylesheet() {
     }
 
     /* Base page colors */
-    html.fbh-dark, body.fbh-dark {
-      background-color: var(--fbh-bg) !important;
-      color: var(--fbh-text) !important;
+    html._dark, body._dark {
+      background-color: var(--_bg) !important;
+      color: var(--_text) !important;
     }
 
     /* Typography defaults to off-white */
-    html.fbh-dark body,
-    html.fbh-dark p,
-    html.fbh-dark span,
-    html.fbh-dark li,
-    html.fbh-dark div,
-    html.fbh-dark td,
-    html.fbh-dark th,
-    html.fbh-dark label,
-    html.fbh-dark small {
-      color: var(--fbh-text) !important;
+    html._dark body,
+    html._dark p,
+    html._dark span,
+    html._dark li,
+    html._dark div,
+    html._dark td,
+    html._dark th,
+    html._dark label,
+    html._dark small {
+      color: var(--_text) !important;
     }
 
     /* Headings a bit brighter */
-    html.fbh-dark h1,
-    html.fbh-dark h2,
-    html.fbh-dark h3,
-    html.fbh-dark h4,
-    html.fbh-dark h5,
-    html.fbh-dark h6,
-    html.fbh-dark strong,
-    html.fbh-dark b {
+    html._dark h1,
+    html._dark h2,
+    html._dark h3,
+    html._dark h4,
+    html._dark h5,
+    html._dark h6,
+    html._dark strong,
+    html._dark b {
       color: #ffffff !important;
     }
 
     /* Links use Fiverr green */
-    html.fbh-dark a,
-    html.fbh-dark a:visited,
-    html.fbh-dark a.link-blue {
-      color: var(--fbh-link) !important;
+    html._dark a,
+    html._dark a:visited,
+    html._dark a.link-blue {
+      color: var(--_link) !important;
     }
-    html.fbh-dark a:hover,
-    html.fbh-dark a:focus,
-    html.fbh-dark a:active {
-      color: var(--fbh-link-hover) !important;
+    html._dark a:hover,
+    html._dark a:focus,
+    html._dark a:active {
+      color: var(--_link-hover) !important;
     }
 
     /* Navbar and header tweaks */
-    html.fbh-dark .header-row,
-    html.fbh-dark .fiverr-nav {
-      background-color: var(--fbh-surface) !important;
+    html._dark .header-row,
+    html._dark .fiverr-nav {
+      background-color: var(--_surface) !important;
     }
 
     /* Nav items default text + hover background */
-    html.fbh-dark .fiverr-nav a,
-    html.fbh-dark .seller-main-item,
-    html.fbh-dark .button-icon {
-      color: var(--fbh-text) !important;
+    html._dark .fiverr-nav a,
+    html._dark .seller-main-item,
+    html._dark .button-icon {
+      color: var(--_text) !important;
       background-color: transparent !important;
     }
 
-    html.fbh-dark .fiverr-nav a:hover,
-    html.fbh-dark .fiverr-nav a:focus,
-    html.fbh-dark .seller-main-item:hover,
-    html.fbh-dark .seller-main-item:focus,
-    html.fbh-dark .QNoIIT4:hover,
-    html.fbh-dark .QNoIIT4:focus {
-      background-color: var(--fbh-hover-soft) !important;
-      color: var(--fbh-link) !important;
+    html._dark .fiverr-nav a:hover,
+    html._dark .fiverr-nav a:focus,
+    html._dark .seller-main-item:hover,
+    html._dark .seller-main-item:focus,
+    html._dark .QNoIIT4:hover,
+    html._dark .QNoIIT4:focus {
+      background-color: var(--_hover-soft) !important;
+      color: var(--_link) !important;
       border-color: transparent !important;
     }
 
-    html.fbh-dark .button-icon:hover,
-    html.fbh-dark .button-icon:focus {
-      background-color: var(--fbh-hover) !important;
-      color: var(--fbh-text) !important;
+    html._dark .button-icon:hover,
+    html._dark .button-icon:focus {
+      background-color: var(--_hover) !important;
+      color: var(--_text) !important;
     }
 
     /* Right-side navbar icon area (prevent white hover) */
-    html.fbh-dark .fiverr-nav-right,
-    html.fbh-dark .seller-nav-right {
-      background-color: var(--fbh-surface) !important;
+    html._dark .fiverr-nav-right,
+    html._dark .seller-nav-right {
+      background-color: var(--_surface) !important;
     }
 
     /* Default state for wrappers */
-    html.fbh-dark .seller-nav-right .seller-main-icon,
-    html.fbh-dark .seller-nav-right .messages-wrapper,
-    html.fbh-dark .seller-nav-right .yjQSnw8,
-    html.fbh-dark .seller-nav-right .adRcHHj,
-    html.fbh-dark .seller-nav-right .Dulmsm5,
-    html.fbh-dark .seller-nav-right .button-icon {
+    html._dark .seller-nav-right .seller-main-icon,
+    html._dark .seller-nav-right .messages-wrapper,
+    html._dark .seller-nav-right .yjQSnw8,
+    html._dark .seller-nav-right .adRcHHj,
+    html._dark .seller-nav-right .Dulmsm5,
+    html._dark .seller-nav-right .button-icon {
       background-color: transparent !important;
-      color: var(--fbh-text) !important;
+      color: var(--_text) !important;
       border-color: transparent !important;
     }
 
     /* Hover/focus: force dark background on any of these wrappers */
-    html.fbh-dark .seller-nav-right .seller-main-icon:hover,
-    html.fbh-dark .seller-nav-right .messages-wrapper:hover,
-    html.fbh-dark .seller-nav-right .yjQSnw8:hover,
-    html.fbh-dark .seller-nav-right .adRcHHj:hover,
-    html.fbh-dark .seller-nav-right .Dulmsm5:hover,
-    html.fbh-dark .seller-nav-right .button-icon:hover,
-    html.fbh-dark .seller-nav-right .seller-main-icon:focus,
-    html.fbh-dark .seller-nav-right .messages-wrapper:focus,
-    html.fbh-dark .seller-nav-right .yjQSnw8:focus,
-    html.fbh-dark .seller-nav-right .adRcHHj:focus,
-    html.fbh-dark .seller-nav-right .Dulmsm5:focus,
-    html.fbh-dark .seller-nav-right .button-icon:focus {
-      background-color: var(--fbh-hover-soft) !important;
-      color: var(--fbh-text) !important;
+    html._dark .seller-nav-right .seller-main-icon:hover,
+    html._dark .seller-nav-right .messages-wrapper:hover,
+    html._dark .seller-nav-right .yjQSnw8:hover,
+    html._dark .seller-nav-right .adRcHHj:hover,
+    html._dark .seller-nav-right .Dulmsm5:hover,
+    html._dark .seller-nav-right .button-icon:hover,
+    html._dark .seller-nav-right .seller-main-icon:focus,
+    html._dark .seller-nav-right .messages-wrapper:focus,
+    html._dark .seller-nav-right .yjQSnw8:focus,
+    html._dark .seller-nav-right .adRcHHj:focus,
+    html._dark .seller-nav-right .Dulmsm5:focus,
+    html._dark .seller-nav-right .button-icon:focus {
+      background-color: var(--_hover-soft) !important;
+      color: var(--_text) !important;
       outline: none !important;
     }
 
     /* Popover containers (bell/letter drawers) should be dark, not white */
-    html.fbh-dark .popover-notifications-drawer,
-    html.fbh-dark .popover-notifications-drawer-light,
-    html.fbh-dark .popover-bell-drawer,
-    html.fbh-dark .popover-letter-drawer {
-      background-color: var(--fbh-surface) !important;
-      color: var(--fbh-text) !important;
-      border-color: var(--fbh-border) !important;
+    html._dark .popover-notifications-drawer,
+    html._dark .popover-notifications-drawer-light,
+    html._dark .popover-bell-drawer,
+    html._dark .popover-letter-drawer {
+      background-color: var(--_surface) !important;
+      color: var(--_text) !important;
+      border-color: var(--_border) !important;
     }
 
     /* Avatar dropdown (account menu) */
-    html.fbh-dark .seller-menu.avatar-menu {
-      background-color: var(--fbh-surface) !important;
-      color: var(--fbh-text) !important;
-      border: 1px solid var(--fbh-border) !important;
+    html._dark .seller-menu.avatar-menu {
+      background-color: var(--_surface) !important;
+      color: var(--_text) !important;
+      border: 1px solid var(--_border) !important;
       box-shadow: none !important;
     }
     /* Items default and hover */
-    html.fbh-dark .seller-menu.avatar-menu li,
-    html.fbh-dark .seller-menu.avatar-menu .KVLCWmB,
-    html.fbh-dark .seller-menu.avatar-menu .custom-item,
-    html.fbh-dark .seller-menu.avatar-menu .wider-part {
+    html._dark .seller-menu.avatar-menu li,
+    html._dark .seller-menu.avatar-menu .KVLCWmB,
+    html._dark .seller-menu.avatar-menu .custom-item,
+    html._dark .seller-menu.avatar-menu .wider-part {
       background-color: transparent !important;
-      color: var(--fbh-text) !important;
+      color: var(--_text) !important;
       border-color: transparent !important;
     }
-    html.fbh-dark .seller-menu.avatar-menu li:hover,
-    html.fbh-dark .seller-menu.avatar-menu .KVLCWmB:hover,
-    html.fbh-dark .seller-menu.avatar-menu .custom-item:hover,
-    html.fbh-dark .seller-menu.avatar-menu .wider-part:hover,
-    html.fbh-dark .seller-menu.avatar-menu .no-hover-background:hover {
-      background-color: var(--fbh-hover-soft) !important;
-      color: var(--fbh-text) !important;
+    html._dark .seller-menu.avatar-menu li:hover,
+    html._dark .seller-menu.avatar-menu .KVLCWmB:hover,
+    html._dark .seller-menu.avatar-menu .custom-item:hover,
+    html._dark .seller-menu.avatar-menu .wider-part:hover,
+    html._dark .seller-menu.avatar-menu .no-hover-background:hover {
+      background-color: var(--_hover-soft) !important;
+      color: var(--_text) !important;
     }
 
     /* Links in menu */
-    html.fbh-dark .seller-menu.avatar-menu a,
-    html.fbh-dark .seller-menu.avatar-menu .nav-link {
-      color: var(--fbh-link) !important;
+    html._dark .seller-menu.avatar-menu a,
+    html._dark .seller-menu.avatar-menu .nav-link {
+      color: var(--_link) !important;
     }
-    html.fbh-dark .seller-menu.avatar-menu a:hover,
-    html.fbh-dark .seller-menu.avatar-menu a:focus {
-      color: var(--fbh-link-hover) !important;
+    html._dark .seller-menu.avatar-menu a:hover,
+    html._dark .seller-menu.avatar-menu a:focus {
+      color: var(--_link-hover) !important;
     }
-    html.fbh-dark .seller-menu.avatar-menu .nav-link-green {
-      color: var(--fbh-link) !important;
+    html._dark .seller-menu.avatar-menu .nav-link-green {
+      color: var(--_link) !important;
     }
 
     /* Buttons in menu */
-    html.fbh-dark .seller-menu.avatar-menu .selection-trigger,
-    html.fbh-dark .seller-menu.avatar-menu .switch-full-width-button,
-    html.fbh-dark .seller-menu.avatar-menu button.menu {
+    html._dark .seller-menu.avatar-menu .selection-trigger,
+    html._dark .seller-menu.avatar-menu .switch-full-width-button,
+    html._dark .seller-menu.avatar-menu button.menu {
       background: transparent !important;
-      color: var(--fbh-text) !important;
-      border: 1px solid var(--fbh-border) !important;
+      color: var(--_text) !important;
+      border: 1px solid var(--_border) !important;
     }
-    html.fbh-dark .seller-menu.avatar-menu .selection-trigger:hover,
-    html.fbh-dark .seller-menu.avatar-menu .switch-full-width-button:hover,
-    html.fbh-dark .seller-menu.avatar-menu button.menu:hover {
-      background-color: var(--fbh-hover-soft) !important;
-      color: var(--fbh-text) !important;
-      border-color: var(--fbh-border) !important;
+    html._dark .seller-menu.avatar-menu .selection-trigger:hover,
+    html._dark .seller-menu.avatar-menu .switch-full-width-button:hover,
+    html._dark .seller-menu.avatar-menu button.menu:hover {
+      background-color: var(--_hover-soft) !important;
+      color: var(--_text) !important;
+      border-color: var(--_border) !important;
     }
 
     /* Divider lines */
-    html.fbh-dark .seller-menu.avatar-menu .bnoiq6h .FIsVjU3,
-    html.fbh-dark .seller-menu.avatar-menu .bnoiq6h,
-    html.fbh-dark .seller-menu.avatar-menu hr {
-      background-color: var(--fbh-border) !important;
-      border-color: var(--fbh-border) !important;
+    html._dark .seller-menu.avatar-menu .bnoiq6h .FIsVjU3,
+    html._dark .seller-menu.avatar-menu .bnoiq6h,
+    html._dark .seller-menu.avatar-menu hr {
+      background-color: var(--_border) !important;
+      border-color: var(--_border) !important;
     }
 
     /* Text utilities inside menu */
-    html.fbh-dark .seller-menu.avatar-menu .text-semi-bold,
-    html.fbh-dark .seller-menu.avatar-menu .tbody-6,
-    html.fbh-dark .seller-menu.avatar-menu .label {
-      color: var(--fbh-text) !important;
+    html._dark .seller-menu.avatar-menu .text-semi-bold,
+    html._dark .seller-menu.avatar-menu .tbody-6,
+    html._dark .seller-menu.avatar-menu .label {
+      color: var(--_text) !important;
     }
 
     /* Orders filter header and tabs */
-    html.fbh-dark .TindYQp,
-    html.fbh-dark .TindYQp .VLYTWjV,
-    html.fbh-dark .TindYQp .dOhjcmI {
+    html._dark .TindYQp,
+    html._dark .TindYQp .VLYTWjV,
+    html._dark .TindYQp .dOhjcmI {
       background: transparent !important;
-      color: var(--fbh-text) !important;
+      color: var(--_text) !important;
       border-color: transparent !important;
     }
-    html.fbh-dark .TindYQp:hover,
-    html.fbh-dark .TindYQp:focus {
-      background-color: var(--fbh-hover-soft) !important;
-      color: var(--fbh-text) !important;
+    html._dark .TindYQp:hover,
+    html._dark .TindYQp:focus {
+      background-color: var(--_hover-soft) !important;
+      color: var(--_text) !important;
     }
 
-    html.fbh-dark .ZkFkaJe,
-    html.fbh-dark .jQjhero {
-      background-color: var(--fbh-surface) !important;
-      border-color: var(--fbh-border) !important;
+    html._dark .ZkFkaJe,
+    html._dark .jQjhero {
+      background-color: var(--_surface) !important;
+      border-color: var(--_border) !important;
     }
 
     /* Tab buttons */
-    html.fbh-dark .ErZ5psE {
+    html._dark .ErZ5psE {
       background: transparent !important;
-      color: var(--fbh-text) !important;
-      border: 1px solid var(--fbh-border) !important;
+      color: var(--_text) !important;
+      border: 1px solid var(--_border) !important;
     }
-    html.fbh-dark .ErZ5psE:hover,
-    html.fbh-dark .ErZ5psE:focus {
-      background-color: var(--fbh-hover-soft) !important;
-      color: var(--fbh-link) !important;
-      border-color: var(--fbh-border) !important;
+    html._dark .ErZ5psE:hover,
+    html._dark .ErZ5psE:focus {
+      background-color: var(--_hover-soft) !important;
+      color: var(--_link) !important;
+      border-color: var(--_border) !important;
     }
     /* Selected/active tab variants */
-    html.fbh-dark .ErZ5psE[aria-pressed="true"],
-    html.fbh-dark .ErZ5psE[aria-selected="true"],
-    html.fbh-dark .ErZ5psE[aria-current="true"],
-    html.fbh-dark .ErZ5psE.active,
-    html.fbh-dark .ErZ5psE.is-selected {
-      background-color: var(--fbh-hover) !important;
-      color: var(--fbh-link) !important;
-      border-color: var(--fbh-link) !important;
+    html._dark .ErZ5psE[aria-pressed="true"],
+    html._dark .ErZ5psE[aria-selected="true"],
+    html._dark .ErZ5psE[aria-current="true"],
+    html._dark .ErZ5psE.active,
+    html._dark .ErZ5psE.is-selected {
+      background-color: var(--_hover) !important;
+      color: var(--_link) !important;
+      border-color: var(--_link) !important;
     }
 
     /* Icons inside tabs inherit color */
-    html.fbh-dark .ErZ5psE .fGyPaK5,
-    html.fbh-dark .ErZ5psE .nFghBOe {
+    html._dark .ErZ5psE .fGyPaK5,
+    html._dark .ErZ5psE .nFghBOe {
       color: inherit !important;
     }
 
@@ -298,258 +298,258 @@ function ensureDarkStylesheet() {
        ============================= */
 
     /* 1) Make all text off-white by default */
-    html.fbh-dark *,
-    html.fbh-dark :before,
-    html.fbh-dark :after {
-      color: var(--fbh-text) !important;
-      border-color: var(--fbh-border) !important;
+    html._dark *,
+    html._dark :before,
+    html._dark :after {
+      color: var(--_text) !important;
+      border-color: var(--_border) !important;
     }
 
     /* 2) Generic interactive hover for most clickable elements */
-    html.fbh-dark a:hover,
-    html.fbh-dark a:focus,
-    html.fbh-dark button:hover,
-    html.fbh-dark button:focus,
-    html.fbh-dark [role="button"]:hover,
-    html.fbh-dark [role="button"]:focus,
-    html.fbh-dark [class*="btn" i]:hover,
-    html.fbh-dark [class*="btn" i]:focus,
-    html.fbh-dark [class*="link" i]:hover,
-    html.fbh-dark [class*="link" i]:focus,
-    html.fbh-dark [class*="item" i]:hover,
-    html.fbh-dark [class*="item" i]:focus,
-    html.fbh-dark [class*="tab" i]:hover,
-    html.fbh-dark [class*="tab" i]:focus,
-    html.fbh-dark [class*="menu" i] li:hover,
-    html.fbh-dark [class*="menu" i] li:focus {
-      background-color: var(--fbh-hover-soft) !important;
-      color: var(--fbh-link) !important;
+    html._dark a:hover,
+    html._dark a:focus,
+    html._dark button:hover,
+    html._dark button:focus,
+    html._dark [role="button"]:hover,
+    html._dark [role="button"]:focus,
+    html._dark [class*="btn" i]:hover,
+    html._dark [class*="btn" i]:focus,
+    html._dark [class*="link" i]:hover,
+    html._dark [class*="link" i]:focus,
+    html._dark [class*="item" i]:hover,
+    html._dark [class*="item" i]:focus,
+    html._dark [class*="tab" i]:hover,
+    html._dark [class*="tab" i]:focus,
+    html._dark [class*="menu" i] li:hover,
+    html._dark [class*="menu" i] li:focus {
+      background-color: var(--_hover-soft) !important;
+      color: var(--_link) !important;
     }
 
     /* 3) Generic surfaces for common container-like components */
-    html.fbh-dark [class*="menu" i],
-    html.fbh-dark [class*="popover" i],
-    html.fbh-dark [class*="popup" i],
-    html.fbh-dark [class*="dropdown" i],
-    html.fbh-dark [class*="tooltip" i],
-    html.fbh-dark [class*="drawer" i],
-    html.fbh-dark [class*="modal" i],
-    html.fbh-dark [class*="dialog" i],
-    html.fbh-dark [class*="conversation" i],
-    html.fbh-dark [class*="message" i],
-    html.fbh-dark [class*="chat" i] {
-      background-color: var(--fbh-surface) !important;
-      color: var(--fbh-text) !important;
-      border-color: var(--fbh-border) !important;
+    html._dark [class*="menu" i],
+    html._dark [class*="popover" i],
+    html._dark [class*="popup" i],
+    html._dark [class*="dropdown" i],
+    html._dark [class*="tooltip" i],
+    html._dark [class*="drawer" i],
+    html._dark [class*="modal" i],
+    html._dark [class*="dialog" i],
+    html._dark [class*="conversation" i],
+    html._dark [class*="message" i],
+    html._dark [class*="chat" i] {
+      background-color: var(--_surface) !important;
+      color: var(--_text) !important;
+      border-color: var(--_border) !important;
       /* keep existing box-shadows from site if they provide hierarchy; tone down only white glows */
       box-shadow: 0 0 0 rgba(0,0,0,0) !important;
     }
 
     /* Conversation/list rows: ensure per-row surface is dark */
-    html.fbh-dark li[class*="item" i],
-    html.fbh-dark li[class*="items" i] {
+    html._dark li[class*="item" i],
+    html._dark li[class*="items" i] {
       background: transparent !important;
     }
-    html.fbh-dark li[class*="item" i] > div,
-    html.fbh-dark li[class*="items" i] > div {
-      background-color: var(--fbh-surface) !important;
+    html._dark li[class*="item" i] > div,
+    html._dark li[class*="items" i] > div {
+      background-color: var(--_surface) !important;
     }
 
     /* 4) Kill white-ish inline backgrounds generically (more variants) */
-    html.fbh-dark [style*="background: white" i],
-    html.fbh-dark [style*="background:white" i],
-    html.fbh-dark [style*="background: #fff" i],
-    html.fbh-dark [style*="background:#fff" i],
-    html.fbh-dark [style*="background: #ffffff" i],
-    html.fbh-dark [style*="background:#ffffff" i],
-    html.fbh-dark [style*="background:rgb(255, 255, 255)" i],
-    html.fbh-dark [style*="background: rgba(255, 255, 255" i],
-    html.fbh-dark [style*="background-color: white" i],
-    html.fbh-dark [style*="background-color:white" i],
-    html.fbh-dark [style*="background-color: #fff" i],
-    html.fbh-dark [style*="background-color:#fff" i],
-    html.fbh-dark [style*="background-color: #ffffff" i],
-    html.fbh-dark [style*="background-color:#ffffff" i],
-    html.fbh-dark [style*="background-color:rgb(255, 255, 255)" i],
-    html.fbh-dark [style*="background-color: rgba(255, 255, 255" i],
-    html.fbh-dark [style*="background: #fefefe" i],
-    html.fbh-dark [style*="background-color: #fefefe" i],
-    html.fbh-dark [style*="background: #fafafa" i],
-    html.fbh-dark [style*="background-color: #fafafa" i],
-    html.fbh-dark [style*="background: #f5f5f5" i],
-    html.fbh-dark [style*="background-color: #f5f5f5" i],
-    html.fbh-dark [style*="background: #f0f2f5" i],
-    html.fbh-dark [style*="background-color: #f0f2f5" i],
-    html.fbh-dark [style*="background: #f0f0f0" i],
-    html.fbh-dark [style*="background-color: #f0f0f0" i] {
-      background-color: var(--fbh-surface) !important;
+    html._dark [style*="background: white" i],
+    html._dark [style*="background:white" i],
+    html._dark [style*="background: #fff" i],
+    html._dark [style*="background:#fff" i],
+    html._dark [style*="background: #ffffff" i],
+    html._dark [style*="background:#ffffff" i],
+    html._dark [style*="background:rgb(255, 255, 255)" i],
+    html._dark [style*="background: rgba(255, 255, 255" i],
+    html._dark [style*="background-color: white" i],
+    html._dark [style*="background-color:white" i],
+    html._dark [style*="background-color: #fff" i],
+    html._dark [style*="background-color:#fff" i],
+    html._dark [style*="background-color: #ffffff" i],
+    html._dark [style*="background-color:#ffffff" i],
+    html._dark [style*="background-color:rgb(255, 255, 255)" i],
+    html._dark [style*="background-color: rgba(255, 255, 255" i],
+    html._dark [style*="background: #fefefe" i],
+    html._dark [style*="background-color: #fefefe" i],
+    html._dark [style*="background: #fafafa" i],
+    html._dark [style*="background-color: #fafafa" i],
+    html._dark [style*="background: #f5f5f5" i],
+    html._dark [style*="background-color: #f5f5f5" i],
+    html._dark [style*="background: #f0f2f5" i],
+    html._dark [style*="background-color: #f0f2f5" i],
+    html._dark [style*="background: #f0f0f0" i],
+    html._dark [style*="background-color: #f0f0f0" i] {
+      background-color: var(--_surface) !important;
     }
 
     /* 5) Ensure list containers and items don't flash white */
-    html.fbh-dark ul,
-    html.fbh-dark li,
-    html.fbh-dark .list,
-    html.fbh-dark [class*="list" i],
-    html.fbh-dark [class*="items" i] {
+    html._dark ul,
+    html._dark li,
+    html._dark .list,
+    html._dark [class*="list" i],
+    html._dark [class*="items" i] {
       background-color: transparent !important;
     }
 
     /* 6) Bring non-currentColor SVG icons into dark palette */
-    html.fbh-dark svg [fill="#404145"],
-    html.fbh-dark svg [fill="#555"],
-    html.fbh-dark svg [fill="#222325"],
-    html.fbh-dark svg [fill="#000"],
-    html.fbh-dark svg [fill="#000000"] {
-      fill: var(--fbh-text) !important;
+    html._dark svg [fill="#404145"],
+    html._dark svg [fill="#555"],
+    html._dark svg [fill="#222325"],
+    html._dark svg [fill="#000"],
+    html._dark svg [fill="#000000"] {
+      fill: var(--_text) !important;
     }
-    html.fbh-dark svg [stroke="#404145"],
-    html.fbh-dark svg [stroke="#62646A"],
-    html.fbh-dark svg [stroke="#222325"],
-    html.fbh-dark svg [stroke="#000"],
-    html.fbh-dark svg [stroke="#000000"] {
-      stroke: var(--fbh-text) !important;
+    html._dark svg [stroke="#404145"],
+    html._dark svg [stroke="#62646A"],
+    html._dark svg [stroke="#222325"],
+    html._dark svg [stroke="#000"],
+    html._dark svg [stroke="#000000"] {
+      stroke: var(--_text) !important;
     }
 
     /* 9) Restore link colors after generic color override */
-    html.fbh-dark a,
-    html.fbh-dark a:visited {
-      color: var(--fbh-link) !important;
+    html._dark a,
+    html._dark a:visited {
+      color: var(--_link) !important;
     }
-    html.fbh-dark a:hover,
-    html.fbh-dark a:focus,
-    html.fbh-dark a:active {
-      color: var(--fbh-link-hover) !important;
+    html._dark a:hover,
+    html._dark a:focus,
+    html._dark a:active {
+      color: var(--_link-hover) !important;
     }
     /* Buttons remain readable */
-    html.fbh-dark button,
-    html.fbh-dark [class*="btn" i] {
-      color: var(--fbh-text) !important;
+    html._dark button,
+    html._dark [class*="btn" i] {
+      color: var(--_text) !important;
     }
 
     /* 7) Delimiters/dividers/separators and simple text badges */
-    html.fbh-dark [class*="delimiter" i],
-    html.fbh-dark [class*="divider" i],
-    html.fbh-dark [class*="separator" i] {
+    html._dark [class*="delimiter" i],
+    html._dark [class*="divider" i],
+    html._dark [class*="separator" i] {
       background-color: transparent !important;
-      border-color: var(--fbh-border) !important;
-      color: var(--fbh-text) !important;
+      border-color: var(--_border) !important;
+      color: var(--_text) !important;
       box-shadow: none !important;
     }
-    html.fbh-dark [class*="delimiter" i] .text,
-    html.fbh-dark [class*="divider" i] .text,
-    html.fbh-dark [class*="separator" i] .text,
-    html.fbh-dark span.text {
+    html._dark [class*="delimiter" i] .text,
+    html._dark [class*="divider" i] .text,
+    html._dark [class*="separator" i] .text,
+    html._dark span.text {
       background-color: transparent !important;
-      color: var(--fbh-muted) !important;
+      color: var(--_muted) !important;
     }
 
     /* 8) Inbox drawer items (generic) */
     /* Row container stays transparent; inner action gets surface */
-    html.fbh-dark li[class*="drawer-item" i] {
+    html._dark li[class*="drawer-item" i] {
       background: transparent !important;
     }
-    html.fbh-dark li[class*="drawer-item" i] > a.main-action {
-      background-color: var(--fbh-surface) !important;
-      color: var(--fbh-text) !important;
-      border: 1px solid var(--fbh-border) !important;
+    html._dark li[class*="drawer-item" i] > a.main-action {
+      background-color: var(--_surface) !important;
+      color: var(--_text) !important;
+      border: 1px solid var(--_border) !important;
     }
     /* Ensure main-action links use normal text color, not global green */
-    html.fbh-dark a.main-action {
-      color: var(--fbh-text) !important;
+    html._dark a.main-action {
+      color: var(--_text) !important;
       text-decoration: none !important;
     }
-    html.fbh-dark a.main-action:hover,
-    html.fbh-dark a.main-action:focus {
-      background-color: var(--fbh-hover-soft) !important;
-      color: var(--fbh-text) !important;
+    html._dark a.main-action:hover,
+    html._dark a.main-action:focus {
+      background-color: var(--_hover-soft) !important;
+      color: var(--_text) !important;
       outline: none !important;
     }
 
     /* Profile image wrappers don't introduce light backgrounds */
-    html.fbh-dark .image-wrapper,
-    html.fbh-dark .profile-picture,
-    html.fbh-dark .user-image {
+    html._dark .image-wrapper,
+    html._dark .profile-picture,
+    html._dark .user-image {
       background-color: transparent !important;
-      border-color: var(--fbh-border) !important;
+      border-color: var(--_border) !important;
     }
 
     /* Unread/Read toggle in the gutter */
-    html.fbh-dark .controls,
-    html.fbh-dark .unread-container {
+    html._dark .controls,
+    html._dark .unread-container {
       background-color: transparent !important;
     }
-    html.fbh-dark .controls .toggle-read,
-    html.fbh-dark .controls .toggle-read.read,
-    html.fbh-dark .controls .toggle-read.unread {
+    html._dark .controls .toggle-read,
+    html._dark .controls .toggle-read.read,
+    html._dark .controls .toggle-read.unread {
       background-color: transparent !important;
-      color: var(--fbh-text) !important; /* off-white icon color */
+      color: var(--_text) !important; /* off-white icon color */
       border: none !important;
     }
-    html.fbh-dark .controls .toggle-read:hover,
-    html.fbh-dark .controls .toggle-read:focus {
-      background-color: var(--fbh-hover-soft) !important;
-      color: var(--fbh-link) !important;
+    html._dark .controls .toggle-read:hover,
+    html._dark .controls .toggle-read:focus {
+      background-color: var(--_hover-soft) !important;
+      color: var(--_link) !important;
       outline: none !important;
     }
     /* Icons in controls follow color */
-    html.fbh-dark .controls svg path,
-    html.fbh-dark .controls svg [fill] {
+    html._dark .controls svg path,
+    html._dark .controls svg [fill] {
       fill: currentColor !important;
     }
 
     /* 10) Tables and listing headers (generic) */
     /* Table containers use dark surface and muted separators */
-    html.fbh-dark table,
-    html.fbh-dark [class*="table" i],
-    html.fbh-dark [class*="tbl-" i] {
-      background-color: var(--fbh-surface) !important;
-      color: var(--fbh-text) !important;
-      border-color: var(--fbh-border) !important;
+    html._dark table,
+    html._dark [class*="table" i],
+    html._dark [class*="tbl-" i] {
+      background-color: var(--_surface) !important;
+      color: var(--_text) !important;
+      border-color: var(--_border) !important;
     }
     /* Rows */
-    html.fbh-dark tr,
-    html.fbh-dark [class*="tbl-row" i] {
-      background-color: var(--fbh-surface) !important;
-      border-bottom: 1px solid var(--fbh-border) !important;
+    html._dark tr,
+    html._dark [class*="tbl-row" i] {
+      background-color: var(--_surface) !important;
+      border-bottom: 1px solid var(--_border) !important;
     }
     /* Header rows */
-    html.fbh-dark thead tr,
-    html.fbh-dark [class*="tbl-row" i].header,
-    html.fbh-dark [class~="header"],
-    html.fbh-dark [class*="header-" i] {
-      background-color: var(--fbh-input) !important;
-      color: var(--fbh-text) !important;
-      border-bottom: 1px solid var(--fbh-border) !important;
+    html._dark thead tr,
+    html._dark [class*="tbl-row" i].header,
+    html._dark [class~="header"],
+    html._dark [class*="header-" i] {
+      background-color: var(--_input) !important;
+      color: var(--_text) !important;
+      border-bottom: 1px solid var(--_border) !important;
     }
     /* Cells */
-    html.fbh-dark th,
-    html.fbh-dark td,
-    html.fbh-dark [class*="tbl-cell" i] {
+    html._dark th,
+    html._dark td,
+    html._dark [class*="tbl-cell" i] {
       background-color: transparent !important;
-      color: var(--fbh-text) !important;
-      border-color: var(--fbh-border) !important;
+      color: var(--_text) !important;
+      border-color: var(--_border) !important;
     }
     /* Header icons (i) should not be white */
-    html.fbh-dark [class*="tbl-cell" i] i,
-    html.fbh-dark th i,
-    html.fbh-dark td i {
+    html._dark [class*="tbl-cell" i] i,
+    html._dark th i,
+    html._dark td i {
       background-color: transparent !important;
-      color: var(--fbh-muted) !important;
+      color: var(--_muted) !important;
     }
     /* Spacer and empty states */
-    html.fbh-dark [class*="spacer" i] { background-color: transparent !important; }
-    html.fbh-dark [class*="empty" i] {
-      background-color: var(--fbh-surface) !important;
-      color: var(--fbh-muted) !important;
-      border: 1px dashed var(--fbh-border) !important;
+    html._dark [class*="spacer" i] { background-color: transparent !important; }
+    html._dark [class*="empty" i] {
+      background-color: var(--_surface) !important;
+      color: var(--_muted) !important;
+      border: 1px dashed var(--_border) !important;
     }
 
     /* 11) Tabs counters: only style badges in the tabs list */
-    html.fbh-dark .tabs li a span {
+    html._dark .tabs li a span {
       display: inline-block !important;
       margin-left: 6px !important;
       padding: 0 6px !important;
-      background-color: var(--fbh-link) !important; /* Fiverr green */
+      background-color: var(--_link) !important; /* Fiverr green */
       color: #ffffff !important; /* ensure contrast */
       border-radius: 9999px !important;
       font-weight: 600 !important;
@@ -558,122 +558,122 @@ function ensureDarkStylesheet() {
       text-align: center !important;
       vertical-align: middle !important;
     }
-    html.fbh-dark .tabs li a:hover span,
-    html.fbh-dark .tabs li a:focus span {
-      background-color: var(--fbh-link-hover) !important;
+    html._dark .tabs li a:hover span,
+    html._dark .tabs li a:focus span {
+      background-color: var(--_link-hover) !important;
       color: #ffffff !important;
     }
 
     /* Muted helper text */
-    html.fbh-dark .co-text-lighter,
-    html.fbh-dark [class*="muted" i] {
-      color: var(--fbh-muted) !important;
+    html._dark .co-text-lighter,
+    html._dark [class*="muted" i] {
+      color: var(--_muted) !important;
     }
 
     /* Common layout containers (broader coverage) */
-    html.fbh-dark header,
-    html.fbh-dark footer,
-    html.fbh-dark nav,
-    html.fbh-dark main,
-    html.fbh-dark section,
-    html.fbh-dark article,
-    html.fbh-dark aside,
-    html.fbh-dark .content,
-    html.fbh-dark .right-panel,
-    html.fbh-dark .dashboard-wrapper,
-    html.fbh-dark .seller-performance-wrapper,
-    html.fbh-dark .seller-dashboard-wrapper,
-    html.fbh-dark .dashboard-box,
-    html.fbh-dark .widget-card,
-    html.fbh-dark .order-card,
-    html.fbh-dark .card-inner,
-    html.fbh-dark .items-container,
-    html.fbh-dark .items-ul,
-    html.fbh-dark .items-li,
-    html.fbh-dark [class*="container" i],
-    html.fbh-dark [class*="wrapper" i],
-    html.fbh-dark [class*="inner" i],
-    html.fbh-dark [class*="content" i],
-    html.fbh-dark [class*="card" i],
-    html.fbh-dark [class*="panel" i],
-    html.fbh-dark [class*="box" i],
-    html.fbh-dark [class*="surface" i] {
-      background-color: var(--fbh-surface) !important;
-      color: var(--fbh-text) !important;
+    html._dark header,
+    html._dark footer,
+    html._dark nav,
+    html._dark main,
+    html._dark section,
+    html._dark article,
+    html._dark aside,
+    html._dark .content,
+    html._dark .right-panel,
+    html._dark .dashboard-wrapper,
+    html._dark .seller-performance-wrapper,
+    html._dark .seller-dashboard-wrapper,
+    html._dark .dashboard-box,
+    html._dark .widget-card,
+    html._dark .order-card,
+    html._dark .card-inner,
+    html._dark .items-container,
+    html._dark .items-ul,
+    html._dark .items-li,
+    html._dark [class*="container" i],
+    html._dark [class*="wrapper" i],
+    html._dark [class*="inner" i],
+    html._dark [class*="content" i],
+    html._dark [class*="card" i],
+    html._dark [class*="panel" i],
+    html._dark [class*="box" i],
+    html._dark [class*="surface" i] {
+      background-color: var(--_surface) !important;
+      color: var(--_text) !important;
     }
 
     /* Fiverr inbox header and row wrappers (hashed classes) */
-    html.fbh-dark [class*="_1g8w6yds"],
-    html.fbh-dark .hvwcvi0,
-    html.fbh-dark .hvwcvi1,
-    html.fbh-dark .hvwcvi2 {
-      background-color: var(--fbh-surface) !important;
+    html._dark [class*="_1g8w6yds"],
+    html._dark .hvwcvi0,
+    html._dark .hvwcvi1,
+    html._dark .hvwcvi2 {
+      background-color: var(--_surface) !important;
     }
 
     /* Skeleton/loading shimmer should not flash white */
-    html.fbh-dark ._12e1mi88,
-    html.fbh-dark .d5j9pe1 {
+    html._dark ._12e1mi88,
+    html._dark .d5j9pe1 {
       background-image: none !important;
-      background-color: var(--fbh-surface) !important;
+      background-color: var(--_surface) !important;
     }
 
     /* Inputs */
-    html.fbh-dark input,
-    html.fbh-dark textarea,
-    html.fbh-dark select {
-      background-color: var(--fbh-input) !important;
-      color: var(--fbh-text) !important;
-      border-color: var(--fbh-border) !important;
+    html._dark input,
+    html._dark textarea,
+    html._dark select {
+      background-color: var(--_input) !important;
+      color: var(--_text) !important;
+      border-color: var(--_border) !important;
     }
 
-    html.fbh-dark ::placeholder {
-      color: var(--fbh-muted) !important;
+    html._dark ::placeholder {
+      color: var(--_muted) !important;
       opacity: 1 !important;
     }
 
     /* Soften borders and shadows */
-    html.fbh-dark * {
-      border-color: var(--fbh-border) !important;
+    html._dark * {
+      border-color: var(--_border) !important;
     }
-    html.fbh-dark .shadow,
-    html.fbh-dark [class*="shadow" i] {
+    html._dark .shadow,
+    html._dark [class*="shadow" i] {
       box-shadow: none !important;
     }
 
     /* Override inline light backgrounds to dark (more variants) */
-    html.fbh-dark [style*="background:#fff"],
-    html.fbh-dark [style*="background: #fff"],
-    html.fbh-dark [style*="background:#ffffff"],
-    html.fbh-dark [style*="background: #ffffff"],
-    html.fbh-dark [style*="background:rgb(255, 255, 255)"],
-    html.fbh-dark [style*="background: rgba(255, 255, 255, 1)"],
-    html.fbh-dark [style*="background-color:#fff"],
-    html.fbh-dark [style*="background-color: #fff"],
-    html.fbh-dark [style*="background-color:#ffffff"],
-    html.fbh-dark [style*="background-color: #ffffff"],
-    html.fbh-dark [style*="background-color:rgb(255, 255, 255)"],
-    html.fbh-dark [style*="background:#f8f9fa"],
-    html.fbh-dark [style*="background-color:#f8f9fa"],
-    html.fbh-dark [style*="background:#fafafa"],
-    html.fbh-dark [style*="background-color:#fafafa"],
-    html.fbh-dark [style*="background:#f5f5f5"],
-    html.fbh-dark [style*="background-color:#f5f5f5"],
-    html.fbh-dark [style*="background:#f0f2f5"],
-    html.fbh-dark [style*="background-color:#f0f2f5"],
-    html.fbh-dark [style*="background:#f0f0f0"],
-    html.fbh-dark [style*="background-color:#f0f0f0"] {
-      background-color: var(--fbh-surface) !important;
+    html._dark [style*="background:#fff"],
+    html._dark [style*="background: #fff"],
+    html._dark [style*="background:#ffffff"],
+    html._dark [style*="background: #ffffff"],
+    html._dark [style*="background:rgb(255, 255, 255)"],
+    html._dark [style*="background: rgba(255, 255, 255, 1)"],
+    html._dark [style*="background-color:#fff"],
+    html._dark [style*="background-color: #fff"],
+    html._dark [style*="background-color:#ffffff"],
+    html._dark [style*="background-color: #ffffff"],
+    html._dark [style*="background-color:rgb(255, 255, 255)"],
+    html._dark [style*="background:#f8f9fa"],
+    html._dark [style*="background-color:#f8f9fa"],
+    html._dark [style*="background:#fafafa"],
+    html._dark [style*="background-color:#fafafa"],
+    html._dark [style*="background:#f5f5f5"],
+    html._dark [style*="background-color:#f5f5f5"],
+    html._dark [style*="background:#f0f2f5"],
+    html._dark [style*="background-color:#f0f2f5"],
+    html._dark [style*="background:#f0f0f0"],
+    html._dark [style*="background-color:#f0f0f0"] {
+      background-color: var(--_surface) !important;
     }
 
     /* Override inline dark text to light */
-    html.fbh-dark [style*="color:#000"],
-    html.fbh-dark [style*="color: #000"],
-    html.fbh-dark [style*="color:#111"],
-    html.fbh-dark [style*="color:#222"],
-    html.fbh-dark [style*="color:#333"],
-    html.fbh-dark [style*="color:#444"],
-    html.fbh-dark [style*="color: rgb(0, 0, 0)"] {
-      color: var(--fbh-text) !important;
+    html._dark [style*="color:#000"],
+    html._dark [style*="color: #000"],
+    html._dark [style*="color:#111"],
+    html._dark [style*="color:#222"],
+    html._dark [style*="color:#333"],
+    html._dark [style*="color:#444"],
+    html._dark [style*="color: rgb(0, 0, 0)"] {
+      color: var(--_text) !important;
     }
   `;
   document.documentElement.appendChild(style);
@@ -702,10 +702,10 @@ function injectImmediateCSS() {
   `;
   
   const style = document.createElement('style');
-  style.id = 'fbh-immediate-style';
+  style.id = '_immediate-style';
   style.textContent = immediateCSS;
   (document.head || document.documentElement).appendChild(style);
-  console.log('Fiverr Privacy Extension: Immediate CSS injected');
+
 }
 
 // Specific selectors for Fiverr balance elements
@@ -727,38 +727,38 @@ const BALANCE_SELECTORS = [
 
 // CSS to hide elements
 const STYLE_CSS = `
-  .fbh-hide {
+  ._hide {
     display: none !important;
     visibility: hidden !important;
   }
 `;
 
 function ensureStyle() {
-  if (document.getElementById('fbh-style')) return;
+  if (document.getElementById('_style')) return;
   const style = document.createElement('style');
-  style.id = 'fbh-style';
+  style.id = '_style';
   style.textContent = STYLE_CSS;
   document.documentElement.appendChild(style);
 }
 
 function showBalanceElements() {
-  console.log('Fiverr Privacy Extension: SHOWING balance elements');
+
   
   // Remove ALL fiverr extension styles
-  const allStyles = document.querySelectorAll('#fbh-immediate-style, #fbh-style');
+  const allStyles = document.querySelectorAll('#_immediate-style, #_style');
   allStyles.forEach(style => {
     style.remove();
-    console.log('Fiverr Privacy Extension: Removed style:', style.id);
+
   });
   
   // Show all previously hidden elements
-  const hiddenElements = document.querySelectorAll('.fbh-hide');
+  const hiddenElements = document.querySelectorAll('._hide');
   hiddenElements.forEach(el => {
-    el.classList.remove('fbh-hide');
+    el.classList.remove('_hide');
     el.style.display = '';
     el.style.visibility = '';
   });
-  console.log('Fiverr Privacy Extension: Removed .fbh-hide from', hiddenElements.length, 'elements');
+
   
   // Force show all balance elements
   BALANCE_SELECTORS.forEach(selector => {
@@ -767,8 +767,8 @@ function showBalanceElements() {
       elements.forEach(el => {
         el.style.display = 'block';
         el.style.visibility = 'visible';
-        el.classList.remove('fbh-hide');
-        console.log('Fiverr Privacy Extension: Force shown element:', el.tagName, el.className);
+        el.classList.remove('_hide');
+
       });
     } catch (e) {
       // Ignore selector errors
@@ -780,10 +780,10 @@ function showBalanceElements() {
   forceShow.forEach(el => {
     el.style.display = '';
     el.style.visibility = '';
-    el.classList.remove('fbh-hide');
+    el.classList.remove('_hide');
   });
   
-  console.log('Fiverr Privacy Extension: Balance showing complete');
+
 }
 
 function hideBalanceElements() {
@@ -793,7 +793,7 @@ function hideBalanceElements() {
   }
 
   // Ensure immediate CSS is present when hiding is enabled
-  if (!document.getElementById('fbh-immediate-style')) {
+  if (!document.getElementById('_immediate-style')) {
     injectImmediateCSS();
   }
 
@@ -802,8 +802,8 @@ function hideBalanceElements() {
     try {
       const elements = document.querySelectorAll(selector);
       elements.forEach(el => {
-        el.classList.add('fbh-hide');
-        console.log('Fiverr Privacy Extension: Hidden element with selector:', selector);
+        el.classList.add('_hide');
+
       });
     } catch (e) {
       // Ignore selector errors
@@ -814,8 +814,8 @@ function hideBalanceElements() {
   const allLinks = document.querySelectorAll('a[href*="/earnings"]');
   allLinks.forEach(link => {
     if (/\$\d+/.test(link.textContent)) {
-      link.classList.add('fbh-hide');
-      console.log('Fiverr Privacy Extension: Hidden earnings link with amount:', link.textContent);
+      link.classList.add('_hide');
+
     }
   });
 
@@ -825,8 +825,8 @@ function hideBalanceElements() {
     let parent = link.parentElement;
     while (parent && parent.tagName !== 'BODY') {
       if (parent.tagName === 'LI') {
-        parent.classList.add('fbh-hide');
-        console.log('Fiverr Privacy Extension: Hidden parent LI element');
+        parent.classList.add('_hide');
+
         break;
       }
       parent = parent.parentElement;
@@ -877,7 +877,7 @@ function process() {
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if (request.action === 'toggleHide') {
     isHideEnabled = request.enabled;
-    console.log('Fiverr Privacy Extension: Toggle received, enabled:', isHideEnabled);
+
     process();
     sendResponse({ success: true });
     return; // no async
@@ -906,13 +906,22 @@ chrome.storage.local.get(['lastBalance', 'lastBalanceAt'], (res) => {
     });
     return true; // keep the channel open for async response
   }
+  if (request.action === 'toggleAutoRefresh') {
+    if (request.enabled) {
+      enableAutoRefreshUI();
+    } else {
+      disableAutoRefreshUI();
+    }
+    sendResponse({ success: true });
+    return;
+  }
 });
 
 // Load user preference first, then inject CSS if needed
 chrome.storage.local.get(['hideBalance', 'darkMode'], function(result) {
   isHideEnabled = result.hideBalance !== false; // Default to true
   const darkEnabled = !!result.darkMode;
-  console.log('Fiverr Privacy Extension: Initial state loaded, hiding enabled:', isHideEnabled, 'dark mode:', darkEnabled);
+
 
   // Apply dark mode preference
   applyDarkMode(darkEnabled);
@@ -927,7 +936,7 @@ chrome.storage.local.get(['hideBalance', 'darkMode'], function(result) {
 
 // Initialize the extension
 (function init() {
-  console.log('Fiverr Privacy Extension: Started');
+
   
   // Initial processing (will be overridden by storage load)
   // process();
@@ -970,3 +979,330 @@ chrome.storage.local.get(['hideBalance', 'darkMode'], function(result) {
   setTimeout(process, 1000);
   setTimeout(process, 3000);
 })();
+
+// ============ Auto-Refresh Feature ============
+
+let autoRefreshCounter = null;
+let countdownTimerId = null;
+let activityListenersAttached = false;
+const COUNTER_STYLE_ID = '_counter-style';
+
+function injectCounterStyles() {
+  if (document.getElementById(COUNTER_STYLE_ID)) return;
+  const style = document.createElement('style');
+  style.id = COUNTER_STYLE_ID;
+  style.textContent = `
+    /* === LIGHT MODE (dark mode OFF) — visible on white backgrounds === */
+    #_auto-refresh-counter {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 2147483647;
+      background: linear-gradient(160deg, rgba(220,230,245,0.2), rgba(200,210,230,0.08));
+      backdrop-filter: blur(28px) saturate(1.4);
+      -webkit-backdrop-filter: blur(28px) saturate(1.4);
+      border-radius: 24px;
+      padding: 16px 26px 12px;
+      min-width: 170px;
+      cursor: grab;
+      user-select: none;
+      -webkit-user-select: none;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.5);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      pointer-events: auto;
+      border: none;
+      transition: opacity 0.25s ease, box-shadow 0.2s ease;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    #_auto-refresh-counter:hover {
+      box-shadow: 0 12px 48px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.55);
+    }
+    #_auto-refresh-counter:active {
+      cursor: grabbing;
+    }
+    #_auto-refresh-counter ._time-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 4px 0;
+    }
+    #_auto-refresh-counter ._counter-time {
+      font-size: 44px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 1.5px;
+      line-height: 1;
+      color: rgba(30,35,45,0.85);
+      text-shadow: 0 1px 6px rgba(0,0,0,0.06);
+    }
+    #_auto-refresh-counter ._controls-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      margin-top: 2px;
+    }
+    #_auto-refresh-counter ._btn {
+      cursor: pointer;
+      border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 14px;
+      padding: 5px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      line-height: 1.4;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      letter-spacing: 0.3px;
+      background: rgba(255,255,255,0.15);
+      color: rgba(30,35,45,0.75);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 2px 8px rgba(0,0,0,0.04);
+    }
+    #_auto-refresh-counter ._btn:hover {
+      background: rgba(255,255,255,0.25);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), 0 0 20px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.08);
+      transform: scale(1.05);
+      color: rgba(30,35,45,0.9);
+    }
+    #_auto-refresh-counter._counter-warning ._counter-time {
+      color: rgba(200,120,30,0.85);
+    }
+    #_auto-refresh-counter._counter-critical ._counter-time {
+      color: rgba(200,50,50,0.85);
+      animation: _pulse 1s ease-in-out infinite;
+    }
+    @keyframes _pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* === DARK MODE (dark mode ON) — pure white glass, exact same as approved === */
+    html._dark #_auto-refresh-counter {
+      background: linear-gradient(160deg, rgba(255,255,255,0.12), rgba(200,210,230,0.06));
+      backdrop-filter: blur(32px) saturate(1.5);
+      -webkit-backdrop-filter: blur(32px) saturate(1.5);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.08), 0 0 0 1px rgba(255,255,255,0.15), inset 0 1px 0 rgba(255,255,255,0.3);
+      border: none;
+    }
+    html._dark #_auto-refresh-counter:hover {
+      box-shadow: 0 12px 48px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.2), inset 0 1px 0 rgba(255,255,255,0.35);
+    }
+    html._dark #_auto-refresh-counter ._counter-time {
+      color: rgba(255,255,255,0.9);
+      text-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    }
+    html._dark #_auto-refresh-counter ._btn {
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.8);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 2px 8px rgba(0,0,0,0.06);
+    }
+    html._dark #_auto-refresh-counter ._btn:hover {
+      background: rgba(255,255,255,0.12);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 0 20px rgba(255,255,255,0.06), 0 2px 8px rgba(0,0,0,0.1);
+      color: rgba(255,255,255,0.95);
+    }
+    html._dark #_auto-refresh-counter._counter-warning ._counter-time {
+      color: rgba(255,255,255,0.9);
+    }
+    html._dark #_auto-refresh-counter._counter-critical ._counter-time {
+      color: rgba(255,255,255,0.9);
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+function createCounterElement() {
+  if (autoRefreshCounter) return;
+
+  injectCounterStyles();
+
+  autoRefreshCounter = document.createElement('div');
+  autoRefreshCounter.id = '_auto-refresh-counter';
+  autoRefreshCounter.innerHTML = `
+    <div class="_time-row">
+      <span class="_counter-time">--:--</span>
+    </div>
+    <div class="_controls-row">
+      <button class="_btn _btn-refresh">&#x21BB; Refresh</button>
+      <button class="_btn _btn-off">&#x2715; OFF</button>
+    </div>
+  `;
+
+  chrome.storage.local.get('autoRefreshPos', (result) => {
+    if (result.autoRefreshPos) {
+      autoRefreshCounter.style.left = result.autoRefreshPos.left;
+      autoRefreshCounter.style.top = result.autoRefreshPos.top;
+      autoRefreshCounter.style.bottom = 'auto';
+      autoRefreshCounter.style.right = 'auto';
+    }
+  });
+
+  const refreshBtn = autoRefreshCounter.querySelector('._btn-refresh');
+  const offBtn = autoRefreshCounter.querySelector('._btn-off');
+
+  refreshBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+  refreshBtn.addEventListener('click', () => {
+    chrome.runtime.sendMessage({ action: 'forceRefresh' });
+  });
+
+  offBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+  offBtn.addEventListener('click', () => {
+    chrome.runtime.sendMessage({ action: 'setAutoRefresh', enabled: false });
+    disableAutoRefreshUI();
+  });
+
+  let isDragging = false;
+  let startX, startY, origLeft, origTop;
+
+  autoRefreshCounter.addEventListener('mousedown', (e) => {
+    if (e.button !== 0) return;
+    isDragging = true;
+    const rect = autoRefreshCounter.getBoundingClientRect();
+    startX = e.clientX;
+    startY = e.clientY;
+    origLeft = rect.left;
+    origTop = rect.top;
+    autoRefreshCounter.style.cursor = 'grabbing';
+    autoRefreshCounter.style.transition = 'none';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    autoRefreshCounter.style.left = (origLeft + dx) + 'px';
+    autoRefreshCounter.style.top = (origTop + dy) + 'px';
+    autoRefreshCounter.style.bottom = 'auto';
+    autoRefreshCounter.style.right = 'auto';
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    autoRefreshCounter.style.cursor = 'grab';
+    autoRefreshCounter.style.transition = '';
+    chrome.storage.local.set({
+      autoRefreshPos: {
+        left: autoRefreshCounter.style.left,
+        top: autoRefreshCounter.style.top
+      }
+    });
+  });
+
+  const appendToBody = () => {
+    if (document.body) {
+      document.body.appendChild(autoRefreshCounter);
+    } else {
+      requestAnimationFrame(appendToBody);
+    }
+  };
+  appendToBody();
+}
+
+function updateCounterDisplay() {
+  if (!autoRefreshCounter) return;
+
+  chrome.storage.local.get(['nextRefreshAt', 'autoRefresh'], (result) => {
+    if (!result.autoRefresh) {
+      autoRefreshCounter.style.display = 'none';
+      chrome.runtime.sendMessage({ action: 'updateBadge', text: '' }).catch(() => {});
+      return;
+    }
+
+    autoRefreshCounter.style.display = 'flex';
+    const timeEl = autoRefreshCounter.querySelector('._counter-time');
+
+    autoRefreshCounter.classList.remove('_counter-warning', '_counter-critical');
+
+    if (!result.nextRefreshAt) {
+      timeEl.textContent = '--:--';
+      chrome.runtime.sendMessage({ action: 'updateBadge', text: '' }).catch(() => {});
+      return;
+    }
+
+    const remaining = Math.max(0, result.nextRefreshAt - Date.now());
+    const totalSecs = Math.ceil(remaining / 1000);
+    const mins = Math.floor(totalSecs / 60);
+    const secs = totalSecs % 60;
+    timeEl.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+
+    if (totalSecs <= 15) {
+      autoRefreshCounter.classList.add('_counter-critical');
+    } else if (totalSecs <= 45) {
+      autoRefreshCounter.classList.add('_counter-warning');
+    }
+
+    const badgeText = `${mins}:${secs.toString().padStart(2, '0')}`;
+    chrome.runtime.sendMessage({ action: 'updateBadge', text: badgeText }).catch(() => {});
+  });
+}
+
+function setupActivityDetection() {
+  if (activityListenersAttached) return;
+  activityListenersAttached = true;
+
+  let lastSave = 0;
+  const saveActivity = (e) => {
+    if (autoRefreshCounter && autoRefreshCounter.contains(e.target)) return;
+    const now = Date.now();
+    if (now - lastSave > 1000) {
+      lastSave = now;
+      chrome.storage.local.set({ userLastActiveAt: now });
+    }
+  };
+
+  document.addEventListener('mousedown', saveActivity, true);
+  document.addEventListener('keydown', saveActivity, true);
+  document.addEventListener('touchstart', saveActivity, true);
+  document.addEventListener('scroll', saveActivity, true);
+
+  chrome.storage.local.set({ userLastActiveAt: Date.now() });
+}
+
+function enableAutoRefreshUI() {
+  createCounterElement();
+  setupActivityDetection();
+  if (!countdownTimerId) {
+    countdownTimerId = setInterval(updateCounterDisplay, 1000);
+  }
+  updateCounterDisplay();
+}
+
+function disableAutoRefreshUI() {
+  if (autoRefreshCounter) {
+    autoRefreshCounter.style.display = 'none';
+  }
+  if (countdownTimerId) {
+    clearInterval(countdownTimerId);
+    countdownTimerId = null;
+  }
+}
+
+chrome.storage.local.get('autoRefresh', (result) => {
+  if (result.autoRefresh) {
+    enableAutoRefreshUI();
+  }
+});
+
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area !== 'local') return;
+
+  if (changes.autoRefresh) {
+    if (changes.autoRefresh.newValue) {
+      enableAutoRefreshUI();
+    } else {
+      disableAutoRefreshUI();
+    }
+  }
+
+  if (changes.nextRefreshAt && autoRefreshCounter) {
+    updateCounterDisplay();
+  }
+});

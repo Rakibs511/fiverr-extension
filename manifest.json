@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "fiverr",
-  "version": "1.0.0",
-  "description": "Hide your available balance on Fiverr for privacy.",
+  "version": "1.1.0",
+  "description": "Hide balance, dark mode, and auto-refresh for Fiverr.",
   "content_scripts": [
     {
       "matches": [
@@ -17,8 +17,13 @@
     "default_popup": "popup.html",
     "default_title": "fiverr"
   },
+  "background": {
+    "service_worker": "background.js"
+  },
   "permissions": [
     "storage",
-    "activeTab"
+    "activeTab",
+    "tabs",
+    "alarms"
   ]
 }
