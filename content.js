@@ -2,7 +2,9 @@
 
 
 // Global state
-let isHideEnabled = true;
+let isHideEnabled = false;
+let hideGigEditEnabled = false;
+let hideProfileEnabled = false;
 
 function safeChrome(fn) {
   try {
@@ -21,676 +23,158 @@ function ensureDarkStylesheet() {
   const style = document.createElement('style');
   style.id = DARK_STYLE_ID;
   style.textContent = `
-    /* Proper dark theme: map light backgrounds to dark and darken text */
     html._dark {
       color-scheme: dark;
       --_bg: #0f1115;
       --_surface: #12151c;
-      --_text: #f1f5f9; /* off-white */
+      --_text: #f1f5f9;
       --_muted: #9aa4b2;
       --_border: #2a2f3a;
       --_input: #0e141b;
-      --_link: #1DBF73; /* Fiverr primary green */
+      --_link: #1DBF73;
       --_link-hover: #17a865;
-      --_hover: #1a2230;            /* solid hover bg */
-      --_hover-soft: rgba(255,255,255,0.06); /* subtle hover tint */
-
-      /* Map some common Fiverr token-like vars (from your DOM snippet) to dark */
-      --_1byh6kb1o: var(--_text);       /* text */
-      --_1byh6kb1h: var(--_surface);    /* surfaces */
-      --_1byh6kb0: var(--_border);      /* subtle borders */
-      --_1byh6kb1e: var(--_border);
-      --_1byh6kb1f: var(--_border);
-      --_1byh6kb9v: var(--_link);       /* primary */
-      --_1byh6kba6: var(--_link-hover); /* primary hover */
-      --_1byh6kb3z: var(--_surface);
-      --_1byh6kb3q: var(--_border);
-      --_1byh6kb1j: var(--_surface);
-      --_1byh6kb1l: var(--_muted);
-
-      /* Map additional Fiverr design tokens seen in inline styles to dark palette */
-      /* Main surfaces and text */
-      --t2seezd: var(--_surface);  /* frequently used as background */
-      --t2seez0: transparent;         /* often used for transparent bg */
-      --t2seez1y: var(--_text);    /* primary text */
-      --t2seez1v: var(--_muted);   /* secondary/muted text */
-      --t2seez1r: #0c0f14;            /* separators/lines */
-      --t2seez1x: #9aa6b2;            /* muted icon/text */
-      --t2seez1w: #7b8794;            /* even more muted */
-      --t2seez1o: #9aa6b2;            /* strokes/icons */
-      --t2seez1p: #cbd5e1;            /* hover/active text on dark */
-      --t2seez1t: #22c55e;            /* status online dot, etc. */
+      --_hover: #1a2230;
+      --_hover-soft: rgba(255,255,255,0.06);
     }
 
-    /* Base page colors */
     html._dark, body._dark {
       background-color: var(--_bg) !important;
       color: var(--_text) !important;
     }
 
-    /* Typography defaults to off-white */
-    html._dark body,
-    html._dark p,
-    html._dark span,
-    html._dark li,
-    html._dark div,
-    html._dark td,
-    html._dark th,
-    html._dark label,
-    html._dark small {
+    html._dark * {
+      border-color: var(--_border) !important;
+    }
+
+    html._dark :where(body, p, span, li, div, td, th, label, small, text, i, em) {
       color: var(--_text) !important;
     }
 
-    /* Headings a bit brighter */
-    html._dark h1,
-    html._dark h2,
-    html._dark h3,
-    html._dark h4,
-    html._dark h5,
-    html._dark h6,
-    html._dark strong,
-    html._dark b {
+    html._dark :where(h1, h2, h3, h4, h5, h6, strong, b) {
       color: #ffffff !important;
     }
 
-    /* Links use Fiverr green */
-    html._dark a,
-    html._dark a:visited,
-    html._dark a.link-blue {
+    html._dark a, html._dark a:visited {
       color: var(--_link) !important;
     }
-    html._dark a:hover,
-    html._dark a:focus,
-    html._dark a:active {
+    html._dark a:hover, html._dark a:focus, html._dark a:active {
       color: var(--_link-hover) !important;
     }
 
-    /* Navbar and header tweaks */
-    html._dark .header-row,
-    html._dark .fiverr-nav {
-      background-color: var(--_surface) !important;
-    }
-
-    /* Nav items default text + hover background */
-    html._dark .fiverr-nav a,
-    html._dark .seller-main-item,
-    html._dark .button-icon {
+    html._dark :where(button, [role="button"], [class*="btn" i], [class*="link" i]) {
       color: var(--_text) !important;
-      background-color: transparent !important;
     }
 
-    html._dark .fiverr-nav a:hover,
-    html._dark .fiverr-nav a:focus,
-    html._dark .seller-main-item:hover,
-    html._dark .seller-main-item:focus,
-    html._dark .QNoIIT4:hover,
-    html._dark .QNoIIT4:focus {
+    html._dark :where(button, a, [role="button"], [class*="btn" i], [class*="link" i], [class*="item" i], [class*="tab" i]):where(:hover, :focus) {
       background-color: var(--_hover-soft) !important;
-      color: var(--_link) !important;
-      border-color: transparent !important;
     }
 
-    html._dark .button-icon:hover,
-    html._dark .button-icon:focus {
-      background-color: var(--_hover) !important;
-      color: var(--_text) !important;
-    }
-
-    /* Right-side navbar icon area (prevent white hover) */
-    html._dark .fiverr-nav-right,
-    html._dark .seller-nav-right {
-      background-color: var(--_surface) !important;
-    }
-
-    /* Default state for wrappers */
-    html._dark .seller-nav-right .seller-main-icon,
-    html._dark .seller-nav-right .messages-wrapper,
-    html._dark .seller-nav-right .yjQSnw8,
-    html._dark .seller-nav-right .adRcHHj,
-    html._dark .seller-nav-right .Dulmsm5,
-    html._dark .seller-nav-right .button-icon {
-      background-color: transparent !important;
-      color: var(--_text) !important;
-      border-color: transparent !important;
-    }
-
-    /* Hover/focus: force dark background on any of these wrappers */
-    html._dark .seller-nav-right .seller-main-icon:hover,
-    html._dark .seller-nav-right .messages-wrapper:hover,
-    html._dark .seller-nav-right .yjQSnw8:hover,
-    html._dark .seller-nav-right .adRcHHj:hover,
-    html._dark .seller-nav-right .Dulmsm5:hover,
-    html._dark .seller-nav-right .button-icon:hover,
-    html._dark .seller-nav-right .seller-main-icon:focus,
-    html._dark .seller-nav-right .messages-wrapper:focus,
-    html._dark .seller-nav-right .yjQSnw8:focus,
-    html._dark .seller-nav-right .adRcHHj:focus,
-    html._dark .seller-nav-right .Dulmsm5:focus,
-    html._dark .seller-nav-right .button-icon:focus {
-      background-color: var(--_hover-soft) !important;
-      color: var(--_text) !important;
-      outline: none !important;
-    }
-
-    /* Popover containers (bell/letter drawers) should be dark, not white */
-    html._dark .popover-notifications-drawer,
-    html._dark .popover-notifications-drawer-light,
-    html._dark .popover-bell-drawer,
-    html._dark .popover-letter-drawer {
+    html._dark :where(nav, header, footer, main, section, article, aside, [class*="menu" i], [class*="popover" i], [class*="popup" i], [class*="dropdown" i], [class*="tooltip" i], [class*="drawer" i], [class*="modal" i], [class*="dialog" i], [class*="card" i], [class*="panel" i], [class*="box" i], [class*="surface" i], [class*="wrapper" i], [class*="container" i], [class*="content" i], [class*="inner" i]) {
       background-color: var(--_surface) !important;
       color: var(--_text) !important;
       border-color: var(--_border) !important;
     }
 
-    /* Avatar dropdown (account menu) */
-    html._dark .seller-menu.avatar-menu {
-      background-color: var(--_surface) !important;
-      color: var(--_text) !important;
-      border: 1px solid var(--_border) !important;
-      box-shadow: none !important;
-    }
-    /* Items default and hover */
-    html._dark .seller-menu.avatar-menu li,
-    html._dark .seller-menu.avatar-menu .KVLCWmB,
-    html._dark .seller-menu.avatar-menu .custom-item,
-    html._dark .seller-menu.avatar-menu .wider-part {
-      background-color: transparent !important;
-      color: var(--_text) !important;
-      border-color: transparent !important;
-    }
-    html._dark .seller-menu.avatar-menu li:hover,
-    html._dark .seller-menu.avatar-menu .KVLCWmB:hover,
-    html._dark .seller-menu.avatar-menu .custom-item:hover,
-    html._dark .seller-menu.avatar-menu .wider-part:hover,
-    html._dark .seller-menu.avatar-menu .no-hover-background:hover {
-      background-color: var(--_hover-soft) !important;
-      color: var(--_text) !important;
-    }
-
-    /* Links in menu */
-    html._dark .seller-menu.avatar-menu a,
-    html._dark .seller-menu.avatar-menu .nav-link {
-      color: var(--_link) !important;
-    }
-    html._dark .seller-menu.avatar-menu a:hover,
-    html._dark .seller-menu.avatar-menu a:focus {
-      color: var(--_link-hover) !important;
-    }
-    html._dark .seller-menu.avatar-menu .nav-link-green {
-      color: var(--_link) !important;
-    }
-
-    /* Buttons in menu */
-    html._dark .seller-menu.avatar-menu .selection-trigger,
-    html._dark .seller-menu.avatar-menu .switch-full-width-button,
-    html._dark .seller-menu.avatar-menu button.menu {
-      background: transparent !important;
-      color: var(--_text) !important;
-      border: 1px solid var(--_border) !important;
-    }
-    html._dark .seller-menu.avatar-menu .selection-trigger:hover,
-    html._dark .seller-menu.avatar-menu .switch-full-width-button:hover,
-    html._dark .seller-menu.avatar-menu button.menu:hover {
-      background-color: var(--_hover-soft) !important;
-      color: var(--_text) !important;
-      border-color: var(--_border) !important;
-    }
-
-    /* Divider lines */
-    html._dark .seller-menu.avatar-menu .bnoiq6h .FIsVjU3,
-    html._dark .seller-menu.avatar-menu .bnoiq6h,
-    html._dark .seller-menu.avatar-menu hr {
-      background-color: var(--_border) !important;
-      border-color: var(--_border) !important;
-    }
-
-    /* Text utilities inside menu */
-    html._dark .seller-menu.avatar-menu .text-semi-bold,
-    html._dark .seller-menu.avatar-menu .tbody-6,
-    html._dark .seller-menu.avatar-menu .label {
-      color: var(--_text) !important;
-    }
-
-    /* Orders filter header and tabs */
-    html._dark .TindYQp,
-    html._dark .TindYQp .VLYTWjV,
-    html._dark .TindYQp .dOhjcmI {
-      background: transparent !important;
-      color: var(--_text) !important;
-      border-color: transparent !important;
-    }
-    html._dark .TindYQp:hover,
-    html._dark .TindYQp:focus {
-      background-color: var(--_hover-soft) !important;
-      color: var(--_text) !important;
-    }
-
-    html._dark .ZkFkaJe,
-    html._dark .jQjhero {
-      background-color: var(--_surface) !important;
-      border-color: var(--_border) !important;
-    }
-
-    /* Tab buttons */
-    html._dark .ErZ5psE {
-      background: transparent !important;
-      color: var(--_text) !important;
-      border: 1px solid var(--_border) !important;
-    }
-    html._dark .ErZ5psE:hover,
-    html._dark .ErZ5psE:focus {
-      background-color: var(--_hover-soft) !important;
-      color: var(--_link) !important;
-      border-color: var(--_border) !important;
-    }
-    /* Selected/active tab variants */
-    html._dark .ErZ5psE[aria-pressed="true"],
-    html._dark .ErZ5psE[aria-selected="true"],
-    html._dark .ErZ5psE[aria-current="true"],
-    html._dark .ErZ5psE.active,
-    html._dark .ErZ5psE.is-selected {
-      background-color: var(--_hover) !important;
-      color: var(--_link) !important;
-      border-color: var(--_link) !important;
-    }
-
-    /* Icons inside tabs inherit color */
-    html._dark .ErZ5psE .fGyPaK5,
-    html._dark .ErZ5psE .nFghBOe {
-      color: inherit !important;
-    }
-
-    /* =============================
-       Generic, broad dark-mode rules
-       ============================= */
-
-    /* 1) Make all text off-white by default */
-    html._dark *,
-    html._dark :before,
-    html._dark :after {
-      color: var(--_text) !important;
-      border-color: var(--_border) !important;
-    }
-
-    /* 2) Generic interactive hover for most clickable elements */
-    html._dark a:hover,
-    html._dark a:focus,
-    html._dark button:hover,
-    html._dark button:focus,
-    html._dark [role="button"]:hover,
-    html._dark [role="button"]:focus,
-    html._dark [class*="btn" i]:hover,
-    html._dark [class*="btn" i]:focus,
-    html._dark [class*="link" i]:hover,
-    html._dark [class*="link" i]:focus,
-    html._dark [class*="item" i]:hover,
-    html._dark [class*="item" i]:focus,
-    html._dark [class*="tab" i]:hover,
-    html._dark [class*="tab" i]:focus,
-    html._dark [class*="menu" i] li:hover,
-    html._dark [class*="menu" i] li:focus {
-      background-color: var(--_hover-soft) !important;
-      color: var(--_link) !important;
-    }
-
-    /* 3) Generic surfaces for common container-like components */
-    html._dark [class*="menu" i],
-    html._dark [class*="popover" i],
-    html._dark [class*="popup" i],
-    html._dark [class*="dropdown" i],
-    html._dark [class*="tooltip" i],
-    html._dark [class*="drawer" i],
-    html._dark [class*="modal" i],
-    html._dark [class*="dialog" i],
-    html._dark [class*="conversation" i],
-    html._dark [class*="message" i],
-    html._dark [class*="chat" i] {
-      background-color: var(--_surface) !important;
-      color: var(--_text) !important;
-      border-color: var(--_border) !important;
-      /* keep existing box-shadows from site if they provide hierarchy; tone down only white glows */
-      box-shadow: 0 0 0 rgba(0,0,0,0) !important;
-    }
-
-    /* Conversation/list rows: ensure per-row surface is dark */
-    html._dark li[class*="item" i],
-    html._dark li[class*="items" i] {
-      background: transparent !important;
-    }
-    html._dark li[class*="item" i] > div,
-    html._dark li[class*="items" i] > div {
-      background-color: var(--_surface) !important;
-    }
-
-    /* 4) Kill white-ish inline backgrounds generically (more variants) */
-    html._dark [style*="background: white" i],
-    html._dark [style*="background:white" i],
-    html._dark [style*="background: #fff" i],
-    html._dark [style*="background:#fff" i],
-    html._dark [style*="background: #ffffff" i],
-    html._dark [style*="background:#ffffff" i],
-    html._dark [style*="background:rgb(255, 255, 255)" i],
-    html._dark [style*="background: rgba(255, 255, 255" i],
-    html._dark [style*="background-color: white" i],
-    html._dark [style*="background-color:white" i],
-    html._dark [style*="background-color: #fff" i],
-    html._dark [style*="background-color:#fff" i],
-    html._dark [style*="background-color: #ffffff" i],
-    html._dark [style*="background-color:#ffffff" i],
-    html._dark [style*="background-color:rgb(255, 255, 255)" i],
-    html._dark [style*="background-color: rgba(255, 255, 255" i],
-    html._dark [style*="background: #fefefe" i],
-    html._dark [style*="background-color: #fefefe" i],
-    html._dark [style*="background: #fafafa" i],
-    html._dark [style*="background-color: #fafafa" i],
-    html._dark [style*="background: #f5f5f5" i],
-    html._dark [style*="background-color: #f5f5f5" i],
-    html._dark [style*="background: #f0f2f5" i],
-    html._dark [style*="background-color: #f0f2f5" i],
-    html._dark [style*="background: #f0f0f0" i],
-    html._dark [style*="background-color: #f0f0f0" i] {
-      background-color: var(--_surface) !important;
-    }
-
-    /* 5) Ensure list containers and items don't flash white */
-    html._dark ul,
-    html._dark li,
-    html._dark .list,
-    html._dark [class*="list" i],
-    html._dark [class*="items" i] {
-      background-color: transparent !important;
-    }
-
-    /* 6) Bring non-currentColor SVG icons into dark palette */
-    html._dark svg [fill="#404145"],
-    html._dark svg [fill="#555"],
-    html._dark svg [fill="#222325"],
-    html._dark svg [fill="#000"],
-    html._dark svg [fill="#000000"] {
-      fill: var(--_text) !important;
-    }
-    html._dark svg [stroke="#404145"],
-    html._dark svg [stroke="#62646A"],
-    html._dark svg [stroke="#222325"],
-    html._dark svg [stroke="#000"],
-    html._dark svg [stroke="#000000"] {
-      stroke: var(--_text) !important;
-    }
-
-    /* 9) Restore link colors after generic color override */
-    html._dark a,
-    html._dark a:visited {
-      color: var(--_link) !important;
-    }
-    html._dark a:hover,
-    html._dark a:focus,
-    html._dark a:active {
-      color: var(--_link-hover) !important;
-    }
-    /* Buttons remain readable */
-    html._dark button,
-    html._dark [class*="btn" i] {
-      color: var(--_text) !important;
-    }
-
-    /* 7) Delimiters/dividers/separators and simple text badges */
-    html._dark [class*="delimiter" i],
-    html._dark [class*="divider" i],
-    html._dark [class*="separator" i] {
-      background-color: transparent !important;
-      border-color: var(--_border) !important;
-      color: var(--_text) !important;
-      box-shadow: none !important;
-    }
-    html._dark [class*="delimiter" i] .text,
-    html._dark [class*="divider" i] .text,
-    html._dark [class*="separator" i] .text,
-    html._dark span.text {
-      background-color: transparent !important;
-      color: var(--_muted) !important;
-    }
-
-    /* 8) Inbox drawer items (generic) */
-    /* Row container stays transparent; inner action gets surface */
-    html._dark li[class*="drawer-item" i] {
-      background: transparent !important;
-    }
-    html._dark li[class*="drawer-item" i] > a.main-action {
-      background-color: var(--_surface) !important;
-      color: var(--_text) !important;
-      border: 1px solid var(--_border) !important;
-    }
-    /* Ensure main-action links use normal text color, not global green */
-    html._dark a.main-action {
-      color: var(--_text) !important;
-      text-decoration: none !important;
-    }
-    html._dark a.main-action:hover,
-    html._dark a.main-action:focus {
-      background-color: var(--_hover-soft) !important;
-      color: var(--_text) !important;
-      outline: none !important;
-    }
-
-    /* Profile image wrappers don't introduce light backgrounds */
-    html._dark .image-wrapper,
-    html._dark .profile-picture,
-    html._dark .user-image {
-      background-color: transparent !important;
-      border-color: var(--_border) !important;
-    }
-
-    /* Unread/Read toggle in the gutter */
-    html._dark .controls,
-    html._dark .unread-container {
-      background-color: transparent !important;
-    }
-    html._dark .controls .toggle-read,
-    html._dark .controls .toggle-read.read,
-    html._dark .controls .toggle-read.unread {
-      background-color: transparent !important;
-      color: var(--_text) !important; /* off-white icon color */
-      border: none !important;
-    }
-    html._dark .controls .toggle-read:hover,
-    html._dark .controls .toggle-read:focus {
-      background-color: var(--_hover-soft) !important;
-      color: var(--_link) !important;
-      outline: none !important;
-    }
-    /* Icons in controls follow color */
-    html._dark .controls svg path,
-    html._dark .controls svg [fill] {
-      fill: currentColor !important;
-    }
-
-    /* 10) Tables and listing headers (generic) */
-    /* Table containers use dark surface and muted separators */
-    html._dark table,
-    html._dark [class*="table" i],
-    html._dark [class*="tbl-" i] {
+    html._dark :where(table, [class*="table" i]) {
       background-color: var(--_surface) !important;
       color: var(--_text) !important;
       border-color: var(--_border) !important;
     }
-    /* Rows */
-    html._dark tr,
-    html._dark [class*="tbl-row" i] {
-      background-color: var(--_surface) !important;
-      border-bottom: 1px solid var(--_border) !important;
-    }
-    /* Header rows */
-    html._dark thead tr,
-    html._dark [class*="tbl-row" i].header,
-    html._dark [class~="header"],
-    html._dark [class*="header-" i] {
+    html._dark :where(thead, th) {
       background-color: var(--_input) !important;
       color: var(--_text) !important;
-      border-bottom: 1px solid var(--_border) !important;
     }
-    /* Cells */
-    html._dark th,
-    html._dark td,
-    html._dark [class*="tbl-cell" i] {
+    html._dark :where(td, tr) {
       background-color: transparent !important;
       color: var(--_text) !important;
       border-color: var(--_border) !important;
     }
-    /* Header icons (i) should not be white */
-    html._dark [class*="tbl-cell" i] i,
-    html._dark th i,
-    html._dark td i {
-      background-color: transparent !important;
-      color: var(--_muted) !important;
-    }
-    /* Spacer and empty states */
-    html._dark [class*="spacer" i] { background-color: transparent !important; }
-    html._dark [class*="empty" i] {
-      background-color: var(--_surface) !important;
-      color: var(--_muted) !important;
-      border: 1px dashed var(--_border) !important;
-    }
 
-    /* 11) Tabs counters: only style badges in the tabs list */
-    html._dark .tabs li a span {
-      display: inline-block !important;
-      margin-left: 6px !important;
-      padding: 0 6px !important;
-      background-color: var(--_link) !important; /* Fiverr green */
-      color: #ffffff !important; /* ensure contrast */
-      border-radius: 9999px !important;
-      font-weight: 600 !important;
-      line-height: 1.4 !important;
-      min-width: 1.25em !important;
-      text-align: center !important;
-      vertical-align: middle !important;
-    }
-    html._dark .tabs li a:hover span,
-    html._dark .tabs li a:focus span {
-      background-color: var(--_link-hover) !important;
-      color: #ffffff !important;
-    }
-
-    /* Muted helper text */
-    html._dark .co-text-lighter,
-    html._dark [class*="muted" i] {
-      color: var(--_muted) !important;
-    }
-
-    /* Common layout containers (broader coverage) */
-    html._dark header,
-    html._dark footer,
-    html._dark nav,
-    html._dark main,
-    html._dark section,
-    html._dark article,
-    html._dark aside,
-    html._dark .content,
-    html._dark .right-panel,
-    html._dark .dashboard-wrapper,
-    html._dark .seller-performance-wrapper,
-    html._dark .seller-dashboard-wrapper,
-    html._dark .dashboard-box,
-    html._dark .widget-card,
-    html._dark .order-card,
-    html._dark .card-inner,
-    html._dark .items-container,
-    html._dark .items-ul,
-    html._dark .items-li,
-    html._dark [class*="container" i],
-    html._dark [class*="wrapper" i],
-    html._dark [class*="inner" i],
-    html._dark [class*="content" i],
-    html._dark [class*="card" i],
-    html._dark [class*="panel" i],
-    html._dark [class*="box" i],
-    html._dark [class*="surface" i] {
-      background-color: var(--_surface) !important;
-      color: var(--_text) !important;
-    }
-
-    /* Fiverr inbox header and row wrappers (hashed classes) */
-    html._dark [class*="_1g8w6yds"],
-    html._dark .hvwcvi0,
-    html._dark .hvwcvi1,
-    html._dark .hvwcvi2 {
-      background-color: var(--_surface) !important;
-    }
-
-    /* Skeleton/loading shimmer should not flash white */
-    html._dark ._12e1mi88,
-    html._dark .d5j9pe1 {
-      background-image: none !important;
-      background-color: var(--_surface) !important;
-    }
-
-    /* Inputs */
-    html._dark input,
-    html._dark textarea,
-    html._dark select {
+    html._dark :where(input, textarea, select) {
       background-color: var(--_input) !important;
       color: var(--_text) !important;
       border-color: var(--_border) !important;
     }
-
     html._dark ::placeholder {
       color: var(--_muted) !important;
       opacity: 1 !important;
     }
 
-    /* Soften borders and shadows */
-    html._dark * {
-      border-color: var(--_border) !important;
-    }
-    html._dark .shadow,
-    html._dark [class*="shadow" i] {
-      box-shadow: none !important;
+    html._dark [class*="muted" i] {
+      color: var(--_muted) !important;
     }
 
-    /* Override inline light backgrounds to dark (more variants) */
-    html._dark [style*="background:#fff"],
-    html._dark [style*="background: #fff"],
-    html._dark [style*="background:#ffffff"],
-    html._dark [style*="background: #ffffff"],
-    html._dark [style*="background:rgb(255, 255, 255)"],
-    html._dark [style*="background: rgba(255, 255, 255, 1)"],
-    html._dark [style*="background-color:#fff"],
-    html._dark [style*="background-color: #fff"],
-    html._dark [style*="background-color:#ffffff"],
-    html._dark [style*="background-color: #ffffff"],
-    html._dark [style*="background-color:rgb(255, 255, 255)"],
-    html._dark [style*="background:#f8f9fa"],
-    html._dark [style*="background-color:#f8f9fa"],
-    html._dark [style*="background:#fafafa"],
-    html._dark [style*="background-color:#fafafa"],
-    html._dark [style*="background:#f5f5f5"],
-    html._dark [style*="background-color:#f5f5f5"],
-    html._dark [style*="background:#f0f2f5"],
-    html._dark [style*="background-color:#f0f2f5"],
-    html._dark [style*="background:#f0f0f0"],
-    html._dark [style*="background-color:#f0f0f0"] {
+    html._dark :where(ul, li) {
+      background-color: transparent !important;
+    }
+
+    html._dark [style*="background" i]:where(
+      [style*="white" i], [style*="#fff"], [style*="#ffffff"],
+      [style*="rgb(255"], [style*="rgba(255"],
+      [style*="#f8f9fa"], [style*="#fafafa"],
+      [style*="#f5f5f5"], [style*="#f0f2f5"], [style*="#f0f0f0"]
+    ) {
       background-color: var(--_surface) !important;
     }
 
-    /* Override inline dark text to light */
-    html._dark [style*="color:#000"],
-    html._dark [style*="color: #000"],
-    html._dark [style*="color:#111"],
-    html._dark [style*="color:#222"],
-    html._dark [style*="color:#333"],
-    html._dark [style*="color:#444"],
-    html._dark [style*="color: rgb(0, 0, 0)"] {
+    html._dark [style*="color:"]:where(
+      [style*="#000"], [style*="#111"], [style*="#222"],
+      [style*="#333"], [style*="#444"], [style*="rgb(0, 0, 0)"]
+    ) {
       color: var(--_text) !important;
+    }
+
+    html._dark .shadow, html._dark [class*="shadow" i] {
+      box-shadow: none !important;
     }
   `;
   document.documentElement.appendChild(style);
 }
 
+function fixStubbornWhite(el) {
+  const bg = getComputedStyle(el).backgroundColor;
+  if (!bg || bg === 'transparent' || bg === 'rgba(0, 0, 0, 0)') return;
+  const rgb = bg.match(/\d+/g);
+  if (rgb && rgb[0] > 200 && rgb[1] > 200 && rgb[2] > 200) {
+    el.style.setProperty('background-color', 'var(--_surface)', 'important');
+  }
+}
+
+let bgFixObserver = null;
+function startBgFixObserver() {
+  if (bgFixObserver) bgFixObserver.disconnect();
+  bgFixObserver = new MutationObserver((mutations) => {
+    const toCheck = [];
+    mutations.forEach(m => {
+      m.addedNodes.forEach(n => {
+        if (n.nodeType === 1) toCheck.push(n);
+      });
+    });
+    requestAnimationFrame(() => {
+      toCheck.forEach(el => {
+        fixStubbornWhite(el);
+        el.querySelectorAll('*').forEach(fixStubbornWhite);
+      });
+    });
+  });
+  bgFixObserver.observe(document.body || document.documentElement, {
+    childList: true, subtree: true
+  });
+}
+
+let appliedOnce = false;
 function applyDarkMode(enabled) {
   ensureDarkStylesheet();
   document.documentElement.classList.toggle(DARK_CLASS, !!enabled);
   if (document.body) {
     document.body.classList.toggle(DARK_CLASS, !!enabled);
+  }
+  if (enabled && !appliedOnce) {
+    appliedOnce = true;
+    requestAnimationFrame(() => {
+      document.querySelectorAll('*').forEach(fixStubbornWhite);
+    });
+    startBgFixObserver();
   }
 }
 
@@ -867,6 +351,35 @@ function extractBalanceText() {
   return null;
 }
 
+function applyHideGigEdit() {
+  document.querySelectorAll('[data-track-tag="dropdown_menu"] a, [class*="menu"] a, nav a').forEach(el => {
+    if (el.textContent.trim() === 'Gigs') {
+      el.classList.toggle('_hide', hideGigEditEnabled);
+    }
+  });
+}
+
+function applyHideProfile() {
+  // 1) Hide "Profile" link text in any navigation/dropdown menu (like applyHideGigEdit)
+  document.querySelectorAll('[data-track-tag="dropdown_menu"] a, [class*="menu"] a, nav a').forEach(el => {
+    if (el.textContent.trim() === 'Profile') {
+      el.classList.toggle('_hide', hideProfileEnabled);
+    }
+  });
+  // 2) Hide the entire account/profile popup (the one with "Sign out")
+  const dropdown = [...document.querySelectorAll('[data-track-tag="dropdown_menu"]')].find(d =>
+    d.textContent.includes('Sign out')
+  );
+  if (!dropdown) return;
+  let el = dropdown.parentElement;
+  const boxes = [];
+  while (el && el.getAttribute && el.getAttribute('data-track-tag') === 'box') {
+    boxes.push(el);
+    el = el.parentElement;
+  }
+  boxes.forEach(box => box.classList.toggle('_hide', hideProfileEnabled));
+}
+
 function updateBalanceCache() {
   const text = extractBalanceText();
   if (text) {
@@ -878,6 +391,8 @@ function process() {
   ensureStyle();
   hideBalanceElements();
   updateBalanceCache();
+  applyHideGigEdit();
+  applyHideProfile();
 }
 
 // Listen for messages from popup
@@ -895,6 +410,18 @@ safeChrome(() => {
       sendResponse({ success: true });
       return;
     }
+    if (request.action === 'toggleHideGigEdit') {
+      hideGigEditEnabled = request.enabled;
+      applyHideGigEdit();
+      sendResponse({ success: true });
+      return;
+    }
+    if (request.action === 'toggleHideProfile') {
+      hideProfileEnabled = request.enabled;
+      applyHideProfile();
+      sendResponse({ success: true });
+      return;
+    }
     if (request.action === 'getBalance') {
       const text = extractBalanceText();
       if (text) {
@@ -902,17 +429,15 @@ safeChrome(() => {
         safeChrome(() => chrome.storage.local.set({ lastBalance: text, lastBalanceAt: Date.now() }, () => {}));
         return;
       }
-      safeChrome(() => {
-        chrome.storage.local.get(['lastBalance', 'lastBalanceAt'], (res) => {
-          sendResponse({
-            success: !!res.lastBalance,
-            balanceText: res.lastBalance || null,
-            source: 'cache',
-            at: res.lastBalanceAt || null
-          });
-        });
-      });
-      return true;
+      // No balance found in DOM — clear cache and report 0
+      safeChrome(() => chrome.storage.local.remove(['lastBalance', 'lastBalanceAt'], () => {}));
+      sendResponse({ success: true, balanceText: '0', source: 'live' });
+      return;
+    }
+    if (request.action === 'toggleMessageFlash') {
+      messageFlashEnabled = request.enabled;
+      sendResponse({ success: true });
+      return;
     }
     if (request.action === 'toggleAutoRefresh') {
       if (request.enabled) {
@@ -923,13 +448,46 @@ safeChrome(() => {
       sendResponse({ success: true });
       return;
     }
+    if (request.action === 'getSessionStats') {
+      sendResponse({
+        active: sessionActiveMs,
+        idle: sessionIdleMs,
+        todayTotal: todayTotalMs,
+        status: isIdle ? 'Idle' : 'Active'
+      });
+      return;
+    }
+    if (request.action === 'getUsername') {
+      var el = document.querySelector('[data-track-tag="avatar"]');
+      var name = el ? el.getAttribute('data-track-value') : '';
+      if (!name) {
+        var fig = document.querySelector('figure[title]');
+        name = fig ? fig.getAttribute('title') : '';
+      }
+      sendResponse({ username: name || '' });
+      return;
+    }
   });
 });
 
 // Load user preference first, then inject CSS if needed
 safeChrome(() => {
-  chrome.storage.local.get(['hideBalance', 'darkMode'], function(result) {
-    isHideEnabled = result.hideBalance !== false;
+  // Extract Fiverr username from header and save it
+  var avatarEl = document.querySelector('[data-track-tag="avatar"]');
+  var username = avatarEl ? avatarEl.getAttribute('data-track-value') : '';
+  if (!username) {
+    var figureEl = document.querySelector('figure[title]');
+    username = figureEl ? figureEl.getAttribute('title') : '';
+  }
+  if (username) {
+    chrome.storage.local.set({ fiverrUsername: username });
+  }
+
+  chrome.storage.local.get(['hideBalance', 'darkMode', 'hideGigEdit', 'hideProfile', 'messageFlash'], function(result) {
+    isHideEnabled = result.hideBalance === true;
+    hideGigEditEnabled = !!result.hideGigEdit;
+    hideProfileEnabled = !!result.hideProfile;
+    messageFlashEnabled = !!result.messageFlash;
     const darkEnabled = !!result.darkMode;
 
     applyDarkMode(darkEnabled);
@@ -939,15 +497,14 @@ safeChrome(() => {
     }
 
     process();
+    applyHideGigEdit();
   });
 });
 
 // Initialize the extension
 (function init() {
-
-  
-  // Initial processing (will be overridden by storage load)
-  // process();
+  ensureFlashStyles();
+  startMessageFlashObserver();
 
   // Watch for dynamic content changes (Fiverr is a SPA)
   let scheduled = false;
@@ -970,23 +527,134 @@ safeChrome(() => {
       });
     } else {
       scheduled = false;
+      applyHideGigEdit();
     }
   });
 
   observer.observe(document.documentElement, {
     childList: true,
-    subtree: true
+    subtree: true,
+    attributes: false
   });
 
   // Also run when page loads
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', process);
+    document.addEventListener('DOMContentLoaded', () => {
+      process();
+      applyHideGigEdit();
+    });
   }
-  
-  // Run again after a short delay to catch any late-loading elements
-  setTimeout(process, 1000);
-  setTimeout(process, 3000);
+
+  setTimeout(() => { process(); }, 1000);
+  setTimeout(() => { process(); }, 3000);
+
+  // Re-apply gig edit hiding when user clicks (avatar menu appears)
+  document.addEventListener('click', () => {
+    setTimeout(applyHideGigEdit, 100);
+  }, true);
 })();
+
+// ============ Message Flash Feature ============
+
+let messageFlashEnabled = false;
+let flashOverlay = null;
+let flashDotSeen = 0;
+
+function showFlashOverlay() {
+  if (flashOverlay) return;
+  flashOverlay = document.createElement('div');
+  flashOverlay.id = '_flash-overlay';
+  flashOverlay.innerHTML = '<div class="_flash-inner"><div class="_flash-text">! New Message</div><div class="_flash-dismiss">Click anywhere to dismiss</div></div>';
+  flashOverlay.addEventListener('click', hideFlashOverlay);
+  document.body.appendChild(flashOverlay);
+}
+
+function hideFlashOverlay() {
+  if (flashOverlay) {
+    flashOverlay.remove();
+    flashOverlay = null;
+  }
+}
+
+function startMessageFlashObserver() {
+  const obs = new MutationObserver((mutations) => {
+    for (const m of mutations) {
+      for (const n of m.addedNodes) {
+        if (n.nodeType !== 1) continue;
+        const dot = n.getAttribute?.('data-track-tag') === 'dot_indicator' ? n
+          : n.querySelector?.('[data-track-tag="dot_indicator"]');
+        if (!dot) continue;
+        if (dot.closest('[aria-label="Messages"]')) {
+          if (messageFlashEnabled) showFlashOverlay();
+          sendNtfyNotification();
+          return;
+        }
+      }
+    }
+  });
+  obs.observe(document.documentElement, { childList: true, subtree: true });
+}
+
+function sendNtfyNotification() {
+  safeChrome(() => {
+    chrome.storage.local.get(['ntfyEnabled', 'ntfyTopic'], (res) => {
+      if (!res.ntfyEnabled || !res.ntfyTopic) return;
+      fetch('https://ntfy.sh/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic: res.ntfyTopic,
+          title: 'Fiverr',
+          message: 'You have received a new message on Fiverr',
+          priority: 5,
+          tags: ['envelope'],
+          click: 'https://www.fiverr.com'
+        })
+      }).catch(() => {});
+    });
+  });
+}
+
+// Inject flash styles
+function ensureFlashStyles() {
+  if (document.getElementById('_flash-style')) return;
+  const style = document.createElement('style');
+  style.id = '_flash-style';
+  style.textContent = `
+    #_flash-overlay {
+      position: fixed; inset: 0; z-index: 2147483647;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.55);
+      animation: _flashBg 0.6s ease-in-out infinite;
+      cursor: pointer;
+    }
+    #_flash-overlay ._flash-inner {
+      background: #1DBF73;
+      color: #fff;
+      padding: 32px 56px;
+      border-radius: 20px;
+      text-align: center;
+      animation: _flashPop 0.5s ease-out;
+      box-shadow: 0 0 80px rgba(29,191,115,0.5);
+    }
+    #_flash-overlay ._flash-text {
+      font-size: 32px; font-weight: 800;
+      margin-bottom: 8px;
+    }
+    #_flash-overlay ._flash-dismiss {
+      font-size: 14px; opacity: 0.75;
+    }
+    @keyframes _flashBg {
+      0%, 100% { background: rgba(0,0,0,0.55); }
+      50% { background: rgba(29,191,115,0.35); }
+    }
+    @keyframes _flashPop {
+      0% { transform: scale(0.6); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  `;
+  (document.head || document.documentElement).appendChild(style);
+}
 
 // ============ Auto-Refresh Feature ============
 
@@ -1322,3 +990,77 @@ safeChrome(() => {
     }
   });
 });
+
+// ============ Session Tracker ============
+
+let sessionActiveMs = 0;
+let sessionIdleMs = 0;
+let lastActivityAt = Date.now();
+let sessionStartAt = Date.now();
+let todayTotalMs = 0;
+let sessionToday = '';
+let isIdle = false;
+const IDLE_THRESHOLD = 60000;
+
+function getTodayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function saveSessionState() {
+  safeChrome(() => chrome.storage.local.set({
+    todayTotalMs, sessionToday: getTodayStr()
+  }, () => {}));
+}
+
+function loadSessionState() {
+  safeChrome(() => {
+    chrome.storage.local.get(['todayTotalMs', 'sessionToday'], (res) => {
+      const today = getTodayStr();
+      if (res.sessionToday === today) {
+        todayTotalMs = res.todayTotalMs || 0;
+      } else {
+        todayTotalMs = 0;
+      }
+    });
+  });
+}
+
+function onUserActivity() {
+  const now = Date.now();
+  const elapsed = now - lastActivityAt;
+  if (isIdle) {
+    sessionIdleMs += Math.min(elapsed, IDLE_THRESHOLD);
+    isIdle = false;
+  }
+  lastActivityAt = now;
+}
+
+function setupSessionTracker() {
+  const events = ['mousedown', 'keydown', 'touchstart', 'mousemove'];
+  events.forEach(ev => {
+    document.addEventListener(ev, onUserActivity, true);
+  });
+  loadSessionState();
+  setInterval(tickSession, 2000);
+  setInterval(saveSessionState, 10000);
+}
+
+function tickSession() {
+  const now = Date.now();
+  const elapsed = now - lastActivityAt;
+  if (elapsed > IDLE_THRESHOLD) {
+    if (!isIdle) {
+      isIdle = true;
+      sessionIdleMs += IDLE_THRESHOLD;
+    }
+    return;
+  }
+  if (isIdle) {
+    isIdle = false;
+  }
+  const delta = Math.min(elapsed, 2000);
+  sessionActiveMs += delta;
+  todayTotalMs += delta;
+}
+
+setupSessionTracker();

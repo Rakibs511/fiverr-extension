@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy Policy - Fiverr Doctor</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 20px; color: #222; line-height: 1.6; }
+    h1 { font-size: 24px; margin-bottom: 4px; }
+    .date { color: #888; font-size: 14px; margin-bottom: 24px; }
+    h2 { font-size: 18px; margin-top: 28px; }
+    p { margin-bottom: 12px; }
+    ul { padding-left: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Privacy Policy</h1>
+  <div class="date">Last updated: July 2026</div>
+
+  <p><strong>Fiverr Doctor</strong> ("the Extension") respects your privacy. This policy describes what information the Extension collects and how it is used.</p>
+
+  <h2>Data Collected</h2>
+  <ul>
+    <li><strong>Fiverr username</strong> — extracted from the page header to generate a personalized notification topic.</li>
+    <li><strong>ntfy topic</strong> — a random or user-defined identifier used to route push notifications.</li>
+    <li><strong>Balance information</strong> — your visible Fiverr balance, stored locally for display in the popup.</li>
+    <li><strong>Extension preferences</strong> — toggle states (dark mode, hide balance, etc.) stored in your browser.</li>
+    <li><strong>Session activity</strong> — active/idle time on Fiverr, stored locally and never transmitted.</li>
+  </ul>
+
+  <h2>How Data Is Used</h2>
+  <ul>
+    <li>All preference data is stored in <strong>chrome.storage.local</strong> and never leaves your browser.</li>
+    <li>The ntfy topic is sent to <strong>ntfy.sh</strong> only when delivering a push notification. No other personal data is included in the request.</li>
+    <li>Balance and session data are used solely for display within the Extension popup.</li>
+  </ul>
+
+  <h2>Third-Party Services</h2>
+  <p>The Extension uses <strong>ntfy.sh</strong> to deliver push notifications to your phone. When a new message is detected, a request containing your topic identifier and a generic message ("You have received a new message on Fiverr") is sent to ntfy.sh. No personal information, Fiverr credentials, or message content is transmitted.</p>
+  <p>ntfy.sh is an open-source notification service. Refer to their privacy policy for details on how they handle data.</p>
+
+  <h2>Data Storage</h2>
+  <p>All extension data is stored locally in your browser using the <strong>chrome.storage.local</strong> API. No data is sent to any server except the ntfy.sh push notification request described above.</p>
+
+  <h2>Data Sharing</h2>
+  <p>We do not sell, trade, or share your personal data with any third parties. The only external request is the ntfy.sh notification delivery, which contains only the topic identifier and a fixed notification message.</p>
+
+  <h2>Contact</h2>
+  <p>If you have questions about this privacy policy, please open an issue on the extension's support page.</p>
+</body>
+</html>

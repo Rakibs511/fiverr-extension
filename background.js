@@ -5,12 +5,7 @@ chrome.storage.local.get(['autoRefresh'], (result) => {
 });
 
 function getRandomDelay() {
-  const min = 3.0;
-  const max = 5.0;
-  const jitter = 0.25;
-  const base = min + Math.random() * (max - min);
-  const jitterAmount = (Math.random() * 2 - 1) * jitter;
-  return Math.max(2.5, Math.min(5.5, base + jitterAmount));
+  return 3.0 + Math.random() * 4.0;
 }
 
 function scheduleNextRefresh() {
